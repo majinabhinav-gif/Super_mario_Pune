@@ -1,0 +1,14 @@
+{
+  "name": "super-punekar",
+  "version": "1.0.0",
+  "description": "A retro platformer set in Pune: World 1 with four levels, original art and chiptune music.",
+  "private": true,
+  "scripts": {
+    "build": "node tools/build.js",
+    "verify": "node tools/verify-levels.js --no-run",
+    "test": "node tools/verify-levels.js --no-run && node tools/smoke-test.js && node tools/play-test.js"
+  },
+  "devDependencies": {
+    "playwright": "^1.56.1"
+  }
+}

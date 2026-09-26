@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Super Punekar sprite sheet</title>
+<style>
+  body { margin: 0; background: #6cb4f0; font: 12px monospace; }
+  canvas { image-rendering: pixelated; display: block; }
+</style>
+</head>
+<body>
+<canvas id="sheet"></canvas>
+<script src="../src/core.js"></script>
+<script src="../src/font.js"></script>
+<script src="../src/sprites.js"></script>
+<script src="../src/scenery.js"></script>
+<script>
+  // Debug view of every sprite at 4x, used when tweaking the pixel art.
+  buildSprites();
+  const S = 4;
+  const c = document.getElementById('sheet');
+  c.width = 1200;
+  c.height = 1500;
+  const g = c.getContext('2d');
+  g.imageSmoothingEnabled = false;
+  g.fillStyle = '#6cb4f0';
+  g.fillRect(0, 0, c.width, c.height);
+  let x = 8, y = 8, rowH = 0;
+  function put(img, label) {
+    const w = img.width * S, h = img.height * S;
+    if (x + w > c.width - 8) { x = 8; y += rowH + 18; rowH = 0; }
+    g.drawImage(img, x, y, w, h);
+    g.fillStyle = '#000';
+    g.fillText(label, x, y + h + 11);
+    x += Math.max(w, label.length * 7) + 10;
+    rowH = Math.max(rowH, h);
+  }
+  for (const pal of ['normal', 'fire']) {
+    for (const size of ['small', 'big']) {
+      const set = Sprites.hero[pal][size];
+      for (const f in set) put(set[f].img, pal[0] + size[0] + '.' + f);
+    }
+  }
+  for (const n in Sprites.s) put(Sprites.s[n].img, n);
+  for (const theme in Sprites.tiles) {
+    const t = Sprites.tiles[theme];
+    for (const n in t) put(Array.isArray(t[n]) ? t[n][0] : t[n], theme.slice(0, 3) + '.' + n);
+  }
+</script>
+</body>
+</html>
