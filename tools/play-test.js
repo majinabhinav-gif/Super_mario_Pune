@@ -153,6 +153,14 @@ function check(cond, msg) {
   await step(2);
   await hold('Enter', 1);
   check(await G('G.paused === false'), 'resumed');
+  await hold('Enter', 1);
+  await step(2);
+  await hold('ArrowDown', 1);
+  await step(1);
+  await hold('ArrowDown', 1);
+  await step(1);
+  await hold('Enter', 1);
+  check(await G("G.state === 'title'"), 'Enter on QUIT TO TITLE goes back to the title');
 
   console.log('flagpole, tally and next level');
   await start(0, 1);

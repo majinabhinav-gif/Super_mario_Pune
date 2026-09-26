@@ -695,7 +695,6 @@ function resumeGame() {
 function updatePause() {
   G.menuItems = pauseItems();
   menuNav();
-  if (Input.pressed('start')) resumeGame();
 }
 
 function menuNav() {
@@ -708,7 +707,7 @@ function menuNav() {
     G.menuIndex = (G.menuIndex + n - 1) % n;
     Sound.play('select');
   }
-  if (Input.pressed('jump') || (Input.pressed('start') && G.state !== 'play') || Input.pressed('run')) {
+  if (Input.pressed('jump') || Input.pressed('start') || Input.pressed('run')) {
     const item = G.menuItems[G.menuIndex];
     if (item) {
       Sound.play('confirm');

@@ -19,6 +19,8 @@ const Input = (() => {
   const pad = {};
   const now = {};
   const prev = {};
+  const hit = {};
+  const latched = {}; // presses shorter than a frame still count once
   let anyPressedFlag = false;
   let lastDevice = 'keyboard';
   const listeners = [];
@@ -34,6 +36,7 @@ const Input = (() => {
     if (e.target && e.target.tagName === 'INPUT') return;
     const b = KEYMAP[e.code];
     if (b) {
+      if (!keys[b] && !e.repeat) latched[b] = true;
       keys[b] = true;
       e.preventDefault();
     }
@@ -58,6 +61,8 @@ const Input = (() => {
     const mine = new Set(btns.flatMap((el) => el.dataset.btn.split(' ')));
     function recompute() {
       for (const b of mine) touch[b] = false;
+      const before = {};
+      for (const b of mine) before[b] = touch[b];
       for (const p of pointers.values()) {
         for (const el of btns) {
           const r = el.getBoundingClientRect();
@@ -67,6 +72,7 @@ const Input = (() => {
           }
         }
       }
+      for (const b of mine) if (touch[b] && !before[b]) latched[b] = true;
       for (const el of btns) {
         el.classList.toggle('on', el.dataset.btn.split(' ').every((n) => touch[n]));
       }
@@ -128,7 +134,9 @@ const Input = (() => {
     for (const b of BUTTONS) {
       prev[b] = now[b];
       now[b] = !!(keys[b] || touch[b] || pad[b]);
-      if (now[b] && !prev[b]) anyPressedFlag = true;
+      hit[b] = (now[b] && !prev[b]) || !!latched[b];
+      latched[b] = false;
+      if (hit[b]) anyPressedFlag = true;
     }
   }
 
@@ -137,14 +145,14 @@ const Input = (() => {
     bindTouch,
     onFirstInteraction,
     down: (b) => !!now[b],
-    pressed: (b) => !!now[b] && !prev[b],
+    pressed: (b) => !!hit[b],
     anyPressed: () => anyPressedFlag,
     device: () => lastDevice,
     setDevice: (d) => (lastDevice = d),
     // Menus: "confirm" is jump, start, or run.
-    confirm: () => (now.jump && !prev.jump) || (now.start && !prev.start),
+    confirm: () => !!(hit.jump || hit.start),
     clear() {
-      for (const b of BUTTONS) keys[b] = touch[b] = now[b] = prev[b] = false;
+      for (const b of BUTTONS) keys[b] = touch[b] = now[b] = prev[b] = hit[b] = latched[b] = false;
     },
   };
 })();
