@@ -113,6 +113,15 @@ class Player extends Ent {
           this.inPipe = false;
         }
         break;
+      case 'grabbed':
+        break;
+      case 'thrown':
+        // flung over the cliff: no control, no floors
+        this.vy = Math.min(this.vy + 0.28, 6);
+        this.x += this.vx;
+        this.y += this.vy;
+        if (this.y > VIEW_H + 8) G.killPlayer('pit');
+        break;
       case 'idle':
       case 'stuck':
         stepPlayerPhysics(this, {}, G.area, G.platforms);
@@ -266,6 +275,7 @@ class Player extends Ent {
     if (this.state === 'flag') return Math.floor(this.anim) % 2 ? 'climb2' : 'climb1';
     if (this.state === 'pipeDown' || this.state === 'pipeUp') return 'stand';
     if (this.state === 'pipeRight') return walk;
+    if (this.state === 'grabbed' || this.state === 'thrown') return 'jump';
     if (this.crouching) return 'crouch';
     if (!this.onGround) return 'jump';
     if (this.skidding && this.state === 'normal') return 'skid';
@@ -980,6 +990,64 @@ class Popup {
   }
   draw(ctx) {
     Font.draw(ctx, this.text, this.x - G.camX, this.y, this.color, { tiny: true, align: 'center', outline: '#1a1020' });
+  }
+}
+
+// The lady at the Sinhagad cliff edge. Harmless, unless you hang around next to
+// her: after a couple of warnings she picks you up and throws you off the cliff.
+class Lady extends Ent {
+  constructor(tx, ty) {
+    super(tx * TILE + 2, (ty + 1) * TILE - 30, 12, 30);
+    this.wait = 0;
+    this.phase = 'idle';
+    this.phaseT = 0;
+    this.facing = -1;
+  }
+  update() {
+    this.t++;
+    const p = G.player;
+    this.facing = p.cx > this.cx ? 1 : -1;
+    if (this.phase === 'idle') {
+      const near =
+        p.state === 'normal' && p.onGround && Math.abs(p.cx - this.cx) < 26 && Math.abs(p.y + p.h - (this.y + this.h)) < 3;
+      this.wait = near ? this.wait + 1 : Math.max(0, this.wait - 3);
+      if (this.wait === 100) G.fx.push(new Bubble('...', this.cx, this.y - 14, 70));
+      if (this.wait === 210) G.fx.push(new Bubble('MOVE ALONG.', this.cx, this.y - 14, 80));
+      if (this.wait >= 300) {
+        this.phase = 'lift';
+        this.phaseT = 0;
+        p.state = 'grabbed';
+        p.vx = p.vy = 0;
+        p.star = 0;
+        G.fx.push(new Bubble('SHOO!', this.cx, this.y - 28, 60));
+        Sound.play('throwIt');
+      }
+    } else if (this.phase === 'lift') {
+      this.phaseT++;
+      // hold the hero up over her head, then toss him off the edge
+      p.x = this.cx - p.w / 2;
+      p.y = this.y - p.h - 2 - Math.min(this.phaseT, 6);
+      if (this.phaseT === 24) {
+        p.state = 'thrown';
+        p.vx = 2.4;
+        p.vy = -5.5;
+        p.facing = 1;
+        Sound.play('kick');
+        this.phase = 'rest';
+        this.phaseT = 0;
+      }
+    } else if (this.phase === 'rest') {
+      if (++this.phaseT > 120) {
+        this.phase = 'idle';
+        this.wait = 0;
+      }
+    }
+  }
+  draw(ctx) {
+    let n = 'stand';
+    if (this.phase === 'lift') n = 'throwIt';
+    else if (this.wait > 100 || this.phase === 'rest') n = (this.t >> 3) % 2 ? 'tap1' : 'tap2';
+    drawSpr(ctx, Sprites.s['lady_' + n], this.x - 2, this.y + this.h - 32, this.facing > 0);
   }
 }
 

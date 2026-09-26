@@ -443,41 +443,83 @@ function buildSkyBG() {
   };
 }
 
+// Shaniwar Wada at dusk: Pune's lights beyond, the fort's sandstone walls with
+// petal-shaped battlements, round bastions flying saffron flags, and palace arches.
 function buildCastleBG() {
-  const wall = makeCanvas(384, 240);
-  const p = PX(wall.getContext('2d'));
-  p.rect(0, 0, 384, 240, '#141020');
-  for (let y = 0; y < 240; y += 16) {
-    const off = (y / 16) % 2 ? 16 : 0;
-    for (let x = -off; x < 384; x += 32) {
-      p.rect(x + 1, y + 1, 30, 14, '#1c1729');
-      p.rect(x + 1, y + 1, 30, 1, '#241e34');
-    }
+  // far: the city at night with Parvati hill lit up
+  const far = makeCanvas(640, 240);
+  let p = PX(far.getContext('2d'));
+  const r = mulberry32(21);
+  const city = ridge(640, 176, [[5, 3, 0.4], [3, 9, 1.1]], []);
+  for (let x = 0; x < 640; x++) {
+    const bump = Math.floor(r() * 3) === 0 ? Math.floor(r() * 14) : 0;
+    p.rect(x, city[x] - bump, 1, 240, '#2a2046');
   }
-  // arched windows looking out on the night sky
-  for (const wx of [40, 232]) {
-    p.rect(wx - 3, 50, 38, 62, '#2c2440');
-    p.circle(wx + 16, 64, 16, '#2c2440');
-    p.rect(wx, 64, 32, 46, '#15204a');
-    p.circle(wx + 16, 64, 13, '#15204a');
-    p.rect(wx + 15, 50, 2, 60, '#2c2440');
-    p.rect(wx, 84, 32, 2, '#2c2440');
-    const r = mulberry32(wx);
-    for (let i = 0; i < 12; i++) p.dot(wx + 2 + r() * 28, 54 + r() * 52, '#e8e8ff');
+  for (let i = 0; i < 160; i++) p.dot(r() * 640, 150 + r() * 70, r() < 0.7 ? '#f8d070' : '#fff4d0');
+  for (let x = 380; x < 520; x++) {
+    const t = (x - 450) / 40;
+    const y = Math.round(176 - 50 * Math.exp(-t * t));
+    p.rect(x, y, 1, 240, '#2e2450');
   }
-  p.circle(52, 70, 5, '#f4f0d0'); // the moon
-  p.circle(54, 69, 4, '#15204a');
-  // carved teak pillars (Shaniwar Wada style)
-  for (const px of [150, 342]) {
-    p.rect(px, 30, 10, 180, '#3e2618');
-    p.rect(px + 1, 30, 2, 180, '#5a3a24');
-    p.rect(px - 4, 30, 18, 6, '#4e3020');
-    p.rect(px - 2, 36, 14, 3, '#4e3020');
-    for (let y = 60; y < 200; y += 24) p.rect(px + 2, y, 6, 2, '#2a180e');
+  paintTempleSpire(p, 450, 128, { stone: '#3a2e5a', light: '#433666', shade: '#2e2450', trim: '#f8d070', gold: '#f8d070', pole: '#3a2e5a', flag: '#f5821f' }, 0.5);
+  for (let i = 0; i < 12; i++) p.dot(430 + i * 3, 131 + (i % 3), '#f8d070');
+
+  // mid: the fort wall
+  const wall = makeCanvas(512, 240);
+  p = PX(wall.getContext('2d'));
+  const top = 112;
+  p.rect(0, top, 512, 240 - top, '#6e4a34');
+  for (let y = top + 8; y < 240; y += 10) {
+    p.rect(0, y, 512, 1, '#5a3a28');
+    for (let x = (y / 10) % 2 ? 0 : 9; x < 512; x += 18) p.rect(x, y - 9, 1, 9, '#5a3a28');
   }
+  // petal-shaped battlements (kangoras)
+  for (let x = 2; x < 512; x += 10) {
+    p.rect(x, top - 5, 6, 5, '#6e4a34');
+    p.rect(x + 1, top - 7, 4, 2, '#6e4a34');
+    p.dot(x + 2, top - 8, '#6e4a34');
+  }
+  for (const bx of [110, 370]) {
+    // round bastion (buruj) with a saffron flag
+    p.rect(bx - 22, top - 26, 44, 240, '#7a5238');
+    p.rect(bx + 14, top - 26, 8, 240, '#62422e');
+    for (let x = bx - 22; x < bx + 22; x += 9) p.rect(x, top - 32, 6, 6, '#7a5238');
+    p.rect(bx, top - 58, 2, 30, '#3a2418');
+    for (let row = 0; row < 12; row++) p.rect(bx + 2, top - 58 + row, 16 - Math.abs(6 - row) * 2, 1, '#f5821f');
+    p.rect(bx - 4, top - 10, 8, 6, '#f8c070');
+  }
+  // the Dilli Darwaza with its iron elephant spikes
+  const gx = 240;
+  p.rect(gx - 30, top - 20, 60, 240, '#7a5238');
+  p.rect(gx - 18, top + 10, 36, 90, '#3a2014');
+  p.circle(gx, top + 12, 18, '#3a2014');
+  p.rect(gx - 16, top + 12, 32, 88, '#5a3218');
+  p.rect(gx, top + 12, 1, 88, '#3a2014');
+  for (let y = top + 22; y < top + 96; y += 12) for (let x = gx - 14; x < gx + 16; x += 7) p.rect(x, y, 2, 3, '#c8c8d0');
+  for (let x = gx - 30; x < gx + 30; x += 8) p.rect(x, top - 26, 6, 6, '#7a5238');
+
+  // near: palace arches glowing with lamplight
+  const arc = makeCanvas(384, 240);
+  p = PX(arc.getContext('2d'));
+  p.rect(0, 150, 384, 90, '#8a5e40');
+  for (let x = 0; x < 384; x += 48) {
+    p.rect(x + 8, 164, 32, 44, '#3a2216');
+    p.circle(x + 24, 166, 16, '#3a2216');
+    p.rect(x + 12, 172, 24, 36, '#f0a860');
+    p.circle(x + 24, 172, 12, '#f0a860');
+    p.rect(x + 16, 180, 16, 28, '#c07038');
+    p.rect(x, 150, 6, 58, '#6a4028'); // teak pillar
+    p.rect(x - 2, 150, 10, 4, '#7a4a2e');
+  }
+  p.rect(0, 146, 384, 5, '#a8784e');
+  for (let x = 0; x < 384; x += 6) p.rect(x, 144, 4, 2, '#a8784e');
   return {
-    sky: [['#141020', 0]],
-    layers: [{ img: wall, par: 0.5, y: 0 }],
+    sky: [['#161434', 0], ['#221c4a', 36], ['#34245a', 70], ['#56306a', 100], ['#86406e', 124], ['#c0586a', 146], ['#e87a5a', 166], ['#f4a462', 188]],
+    layers: [
+      { img: far, par: 0.12, y: 0 },
+      { img: wall, par: 0.3, y: 0 },
+      { img: arc, par: 0.55, y: 0 },
+    ],
   };
 }
 
@@ -928,6 +970,50 @@ const DecorPainters = {
     for (let x = 2; x < W; x += 6) lights.push([x, 25 + ((x / 6) % 2)]);
     return { img: c, ox: -8, oy: -H, lights };
   },
+  fountain() {
+    // lotus fountain like the Hazari Karanje
+    const c = makeCanvas(56, 30);
+    const p = PX(c.getContext('2d'));
+    p.rect(2, 20, 52, 10, '#c09068');
+    p.rect(2, 20, 52, 2, '#e0b890');
+    p.rect(6, 22, 44, 5, '#4a8ac8');
+    for (let i = 0; i < 6; i++) p.circle(10 + i * 7, 18, 4, i % 2 ? '#f07cb0' : '#f8a8c8');
+    p.rect(26, 6, 4, 14, '#c09068');
+    for (let i = 0; i < 9; i++) {
+      p.dot(28 - i * 2, 4 + Math.round((i * i) / 5), '#bfe4ff');
+      p.dot(28 + i * 2, 4 + Math.round((i * i) / 5), '#bfe4ff');
+    }
+    return { img: c, ox: -4, oy: -30 };
+  },
+  gate() {
+    // Dilli Darwaza, the great entrance gate of Shaniwar Wada
+    const c = makeCanvas(96, 112);
+    const g = c.getContext('2d');
+    const p = PX(g);
+    p.rect(0, 12, 96, 100, '#8a5c3a');
+    for (let y = 22; y < 112; y += 10) {
+      p.rect(0, y, 96, 1, '#6e4a30');
+      for (let x = (y / 10) % 2 ? 0 : 8; x < 96; x += 16) p.rect(x, y - 9, 1, 9, '#6e4a30');
+    }
+    for (let x = 1; x < 96; x += 10) {
+      p.rect(x, 5, 7, 7, '#8a5c3a');
+      p.rect(x + 2, 2, 3, 3, '#8a5c3a');
+    }
+    p.rect(20, 40, 56, 72, '#3a2014');
+    p.circle(48, 42, 28, '#3a2014');
+    p.rect(24, 44, 48, 68, '#6a3a1e');
+    p.circle(48, 44, 24, '#6a3a1e');
+    p.rect(47, 22, 2, 90, '#3a2014');
+    for (let y = 44; y < 108; y += 12) for (let x = 28; x < 70; x += 8) {
+      p.rect(x, y, 2, 4, '#d0d0d8');
+      p.dot(x, y - 1, '#ffffff');
+    }
+    p.rect(30, 26, 36, 9, '#1a1020');
+    Font.draw(g, 'SHANIWAR', 48, 28, '#fcd23c', { tiny: true, align: 'center' });
+    p.rect(46, -2, 2, 14, '#3a2418');
+    for (let row = 0; row < 8; row++) p.rect(48, row - 2, 10 - Math.abs(4 - row) * 2, 1, '#f5821f');
+    return { img: c, ox: 0, oy: -112 };
+  },
   basket() {
     const c = makeCanvas(40, 30);
     const p = PX(c.getContext('2d'));
@@ -948,6 +1034,25 @@ function paintDecor(d) {
   const painter = DecorPainters[d.type];
   if (!painter) throw new Error('Unknown decor ' + d.type);
   return painter(d);
+}
+
+// Akash kandil (star lantern) swaying on a string, drawn every frame.
+function drawKandil(ctx, x, y, frame, hue) {
+  const sway = Math.round(Math.sin(frame * 0.05 + x) * 2);
+  ctx.fillStyle = '#3a2418';
+  ctx.fillRect(x + 7, 0, 1, y + 2);
+  const cx = x + 7 + sway;
+  const cols = [['#f5821f', '#fcd23c'], ['#e2352b', '#f5821f'], ['#f07cb0', '#fcd23c']][hue % 3];
+  ctx.fillStyle = cols[0];
+  ctx.fillRect(cx - 5, y + 4, 11, 7);
+  ctx.fillRect(cx - 2, y + 1, 5, 13);
+  ctx.fillRect(cx - 7, y + 6, 15, 3);
+  ctx.fillStyle = cols[1];
+  ctx.fillRect(cx - 2, y + 5, 5, 5);
+  ctx.fillStyle = (frame >> 4) % 2 ? '#fff4d0' : '#fce8a0';
+  ctx.fillRect(cx, y + 7, 1, 1);
+  ctx.fillStyle = cols[0];
+  for (let i = 0; i < 3; i++) ctx.fillRect(cx - 3 + i * 3, y + 14, 1, 4 + (i % 2) * 2);
 }
 
 // Animated wall torch (castle), drawn every frame.

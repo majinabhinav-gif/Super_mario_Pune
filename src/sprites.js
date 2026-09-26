@@ -735,6 +735,59 @@ const SPR_DEFS = {
   ],
 };
 
+// A lady in a black western dress who does not like people standing next to her (16x32, faces left).
+const LADY_STAND = [
+  '.....HHHHH......',
+  '....HHHHHHH.....',
+  '...HHHHHHHHH....',
+  '...HSSSSSHHH....',
+  '...SKSSSSHHHH...',
+  '...SSSSSSHHHH...',
+  '..SSSSSSSHHHH...',
+  '...SRRSSSHHHH...',
+  '....SSSSHHHHH...',
+  '.....SSSYHHHH...',
+  '....KKKKKKHHH...',
+  '...SKKKKKKKSH...',
+  '...SKkKKKKKS....',
+  '...SKKKKKKKS....',
+  '...SKKKKKKKS....',
+  '...SKKKKKkKS....',
+  '....KKKKKKK.....',
+  '....KKKKKKK.....',
+  '...KKKKKKKKK....',
+  '...KKkKKKKKK....',
+  '..KKKKKKKKKKK...',
+  '..KKKKKKKkKKK...',
+  '..KKKKKKKKKKK...',
+  '..kKKKKKKKKKk...',
+  '....SS...SS.....',
+  '....SS...SS.....',
+  '....SS...SS.....',
+  '....SS...SS.....',
+  '....SS...SS.....',
+  '....SS...SS.....',
+  '...KKS..KKS.....',
+  '...K.K..K.K.....',
+];
+function ladyFrames() {
+  const edit = (rows, changes) => {
+    const out = rows.map((r) => r.split(''));
+    for (const [y, x, c] of changes) out[y][x] = c;
+    return out.map((r) => r.join(''));
+  };
+  const cross = [];
+  for (let x = 3; x <= 11; x++) cross.push([12, x, x === 3 || x === 11 ? 'K' : 'S']);
+  for (let y = 11; y <= 15; y++) if (y !== 12) cross.push([y, 3, '.'], [y, 11, y === 11 ? 'K' : '.']);
+  const tap1 = edit(LADY_STAND, [[3, 4, 'K'], [3, 5, 'K'], ...cross]);
+  const tap2 = edit(tap1, [[30, 3, '.'], [31, 3, '.'], [31, 5, '.'], [29, 3, 'K'], [30, 4, 'K']]);
+  const up = [];
+  for (let y = 2; y <= 10; y++) up.push([y, 1, 'S'], [y, 13, 'S']);
+  for (let y = 11; y <= 15; y++) up.push([y, 3, '.'], [y, 11, '.']);
+  const throwIt = edit(LADY_STAND, [[3, 4, 'K'], [3, 5, 'K'], [7, 4, 'K'], [7, 5, 'K'], ...up]);
+  return { stand: LADY_STAND, tap1, tap2, throwIt };
+}
+
 // Makad Raja (the monkey king boss), 32x32, facing left.
 const BOSS_TOP = [
   '................................',
@@ -1016,12 +1069,12 @@ const THEME_PALS = {
     pipe: { K: '#0f2c12', a: '#3caa44', b: '#1f6e2a', c: '#9ae67a', L: '#e4ffd0' },
   },
   castle: {
-    ground: { a: '#6e6a78', b: '#2a2832', c: '#a09cac', d: '#5e5a68' },
-    stone: { a: '#6e6a78', b: '#2a2832', c: '#a09cac', d: '#5e5a68' },
-    brick: { a: '#6e6a78', b: '#2a2832', c: '#a09cac', d: '#5e5a68' },
+    ground: { a: '#a0704a', b: '#4a2e1c', c: '#d0a070', d: '#8a5c3a' },
+    stone: { a: '#a0704a', b: '#4a2e1c', c: '#d0a070', d: '#8a5c3a' },
+    brick: { a: '#a0704a', b: '#4a2e1c', c: '#d0a070', d: '#8a5c3a' },
     qblock: { a: '#f0a020', b: '#8a4a10', c: '#ffe08a', K: '#5a2a08', q: '#fff4d0' },
     used: { a: '#7a6048', b: '#2e2018', c: '#a08468', K: '#2e2018' },
-    hard: { a: '#6e6a78', b: '#2a2832', c: '#a09cac', d: '#5e5a68' },
+    hard: { a: '#8a6446', b: '#40281a', c: '#c09068', d: '#76523a' },
     bridge: { a: '#b06a30', b: '#5a3010', c: '#e09a58', d: '#c8c8d0' },
     pipe: { K: '#0f2c12', a: '#3caa44', b: '#1f6e2a', c: '#9ae67a', L: '#e4ffd0' },
   },
@@ -1160,6 +1213,8 @@ function buildSprites() {
     { S: '#f4a26e', s: '#c0703e', P: '#f07cb0', p: '#b04070', O: '#fcd23c', R: '#d8302a' },
     'ganesha'
   );
+  const lf = ladyFrames();
+  for (const n in lf) Sprites.s['lady_' + n] = makeSprite(lf[n], { K: '#15101c', k: '#3e3448', H: '#1e120c' }, 'lady.' + n);
   const bossPal = { N: '#6a4a3a', T: '#e8b890' };
   for (const f in BOSS_BOTTOM) {
     Sprites.s['boss_' + f] = makeSprite(BOSS_TOP.concat(BOSS_BOTTOM[f]), bossPal, 'boss.' + f);

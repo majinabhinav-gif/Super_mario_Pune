@@ -213,6 +213,7 @@ function level1_3() {
   A.enemy('pigeon', 53, 6);
   A.ledge(57, 59, 8);
   A.ledge(62, 68, 11);
+  A.enemy('lady', 68, 10);
   A.coins(63, 67, 8);
   A.enemy('monkey', 66, 10, { smart: true });
   A.platform({ kind: 'fall', x: 71, y: 10, w: 2 });
@@ -256,7 +257,12 @@ function level1_3() {
 function level1_4() {
   const A = new Area('main', 162, 'castle', { music: 'castle' });
   const S = T.STONE;
-  A.fill(0, 161, 0, 2, S); // ceiling
+  // the Dilli Darwaza you walk out of, a lotus fountain and a guide board
+  A.deco('gate', 0, 10);
+  A.sign(11, ['SHANIWAR WADA.', 'BUILT IN 1732.', 'PLEASE DO NOT', 'BREAK ANYTHING.'], { y: 10 });
+  A.deco('fountain', 20);
+  A.deco('fountain', 80);
+  A.deco('fountain', 110);
 
   // entrance hall
   A.fill(0, 14, 10, 14, S);
@@ -310,7 +316,10 @@ function level1_4() {
   A.sign(149, ['RING BELL ONCE.', 'WE ARE NOT DEAF.'], { y: 12 });
   A.deco('basket', 155, 12);
 
-  for (const x of [5, 20, 28, 46, 64, 80, 100, 112, 128, 150]) A.deco('torch', x, 6, { anim: true });
+  for (const x of [28, 46, 64, 100, 128, 150]) A.deco('torch', x, 8, { anim: true });
+  for (const [x, y] of [[12, 3], [24, 2], [36, 4], [58, 2], [70, 3], [88, 2], [100, 4], [116, 3], [134, 2], [146, 3], [156, 2]]) {
+    A.deco('kandil', x, y, { anim: true });
+  }
 
   return {
     id: '1-4',

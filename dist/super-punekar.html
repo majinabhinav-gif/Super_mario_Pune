@@ -1923,6 +1923,59 @@ const SPR_DEFS = {
   ],
 };
 
+// A lady in a black western dress who does not like people standing next to her (16x32, faces left).
+const LADY_STAND = [
+  '.....HHHHH......',
+  '....HHHHHHH.....',
+  '...HHHHHHHHH....',
+  '...HSSSSSHHH....',
+  '...SKSSSSHHHH...',
+  '...SSSSSSHHHH...',
+  '..SSSSSSSHHHH...',
+  '...SRRSSSHHHH...',
+  '....SSSSHHHHH...',
+  '.....SSSYHHHH...',
+  '....KKKKKKHHH...',
+  '...SKKKKKKKSH...',
+  '...SKkKKKKKS....',
+  '...SKKKKKKKS....',
+  '...SKKKKKKKS....',
+  '...SKKKKKkKS....',
+  '....KKKKKKK.....',
+  '....KKKKKKK.....',
+  '...KKKKKKKKK....',
+  '...KKkKKKKKK....',
+  '..KKKKKKKKKKK...',
+  '..KKKKKKKkKKK...',
+  '..KKKKKKKKKKK...',
+  '..kKKKKKKKKKk...',
+  '....SS...SS.....',
+  '....SS...SS.....',
+  '....SS...SS.....',
+  '....SS...SS.....',
+  '....SS...SS.....',
+  '....SS...SS.....',
+  '...KKS..KKS.....',
+  '...K.K..K.K.....',
+];
+function ladyFrames() {
+  const edit = (rows, changes) => {
+    const out = rows.map((r) => r.split(''));
+    for (const [y, x, c] of changes) out[y][x] = c;
+    return out.map((r) => r.join(''));
+  };
+  const cross = [];
+  for (let x = 3; x <= 11; x++) cross.push([12, x, x === 3 || x === 11 ? 'K' : 'S']);
+  for (let y = 11; y <= 15; y++) if (y !== 12) cross.push([y, 3, '.'], [y, 11, y === 11 ? 'K' : '.']);
+  const tap1 = edit(LADY_STAND, [[3, 4, 'K'], [3, 5, 'K'], ...cross]);
+  const tap2 = edit(tap1, [[30, 3, '.'], [31, 3, '.'], [31, 5, '.'], [29, 3, 'K'], [30, 4, 'K']]);
+  const up = [];
+  for (let y = 2; y <= 10; y++) up.push([y, 1, 'S'], [y, 13, 'S']);
+  for (let y = 11; y <= 15; y++) up.push([y, 3, '.'], [y, 11, '.']);
+  const throwIt = edit(LADY_STAND, [[3, 4, 'K'], [3, 5, 'K'], [7, 4, 'K'], [7, 5, 'K'], ...up]);
+  return { stand: LADY_STAND, tap1, tap2, throwIt };
+}
+
 // Makad Raja (the monkey king boss), 32x32, facing left.
 const BOSS_TOP = [
   '................................',
@@ -2204,12 +2257,12 @@ const THEME_PALS = {
     pipe: { K: '#0f2c12', a: '#3caa44', b: '#1f6e2a', c: '#9ae67a', L: '#e4ffd0' },
   },
   castle: {
-    ground: { a: '#6e6a78', b: '#2a2832', c: '#a09cac', d: '#5e5a68' },
-    stone: { a: '#6e6a78', b: '#2a2832', c: '#a09cac', d: '#5e5a68' },
-    brick: { a: '#6e6a78', b: '#2a2832', c: '#a09cac', d: '#5e5a68' },
+    ground: { a: '#a0704a', b: '#4a2e1c', c: '#d0a070', d: '#8a5c3a' },
+    stone: { a: '#a0704a', b: '#4a2e1c', c: '#d0a070', d: '#8a5c3a' },
+    brick: { a: '#a0704a', b: '#4a2e1c', c: '#d0a070', d: '#8a5c3a' },
     qblock: { a: '#f0a020', b: '#8a4a10', c: '#ffe08a', K: '#5a2a08', q: '#fff4d0' },
     used: { a: '#7a6048', b: '#2e2018', c: '#a08468', K: '#2e2018' },
-    hard: { a: '#6e6a78', b: '#2a2832', c: '#a09cac', d: '#5e5a68' },
+    hard: { a: '#8a6446', b: '#40281a', c: '#c09068', d: '#76523a' },
     bridge: { a: '#b06a30', b: '#5a3010', c: '#e09a58', d: '#c8c8d0' },
     pipe: { K: '#0f2c12', a: '#3caa44', b: '#1f6e2a', c: '#9ae67a', L: '#e4ffd0' },
   },
@@ -2348,6 +2401,8 @@ function buildSprites() {
     { S: '#f4a26e', s: '#c0703e', P: '#f07cb0', p: '#b04070', O: '#fcd23c', R: '#d8302a' },
     'ganesha'
   );
+  const lf = ladyFrames();
+  for (const n in lf) Sprites.s['lady_' + n] = makeSprite(lf[n], { K: '#15101c', k: '#3e3448', H: '#1e120c' }, 'lady.' + n);
   const bossPal = { N: '#6a4a3a', T: '#e8b890' };
   for (const f in BOSS_BOTTOM) {
     Sprites.s['boss_' + f] = makeSprite(BOSS_TOP.concat(BOSS_BOTTOM[f]), bossPal, 'boss.' + f);
@@ -2896,41 +2951,83 @@ function buildSkyBG() {
   };
 }
 
+// Shaniwar Wada at dusk: Pune's lights beyond, the fort's sandstone walls with
+// petal-shaped battlements, round bastions flying saffron flags, and palace arches.
 function buildCastleBG() {
-  const wall = makeCanvas(384, 240);
-  const p = PX(wall.getContext('2d'));
-  p.rect(0, 0, 384, 240, '#141020');
-  for (let y = 0; y < 240; y += 16) {
-    const off = (y / 16) % 2 ? 16 : 0;
-    for (let x = -off; x < 384; x += 32) {
-      p.rect(x + 1, y + 1, 30, 14, '#1c1729');
-      p.rect(x + 1, y + 1, 30, 1, '#241e34');
-    }
+  // far: the city at night with Parvati hill lit up
+  const far = makeCanvas(640, 240);
+  let p = PX(far.getContext('2d'));
+  const r = mulberry32(21);
+  const city = ridge(640, 176, [[5, 3, 0.4], [3, 9, 1.1]], []);
+  for (let x = 0; x < 640; x++) {
+    const bump = Math.floor(r() * 3) === 0 ? Math.floor(r() * 14) : 0;
+    p.rect(x, city[x] - bump, 1, 240, '#2a2046');
   }
-  // arched windows looking out on the night sky
-  for (const wx of [40, 232]) {
-    p.rect(wx - 3, 50, 38, 62, '#2c2440');
-    p.circle(wx + 16, 64, 16, '#2c2440');
-    p.rect(wx, 64, 32, 46, '#15204a');
-    p.circle(wx + 16, 64, 13, '#15204a');
-    p.rect(wx + 15, 50, 2, 60, '#2c2440');
-    p.rect(wx, 84, 32, 2, '#2c2440');
-    const r = mulberry32(wx);
-    for (let i = 0; i < 12; i++) p.dot(wx + 2 + r() * 28, 54 + r() * 52, '#e8e8ff');
+  for (let i = 0; i < 160; i++) p.dot(r() * 640, 150 + r() * 70, r() < 0.7 ? '#f8d070' : '#fff4d0');
+  for (let x = 380; x < 520; x++) {
+    const t = (x - 450) / 40;
+    const y = Math.round(176 - 50 * Math.exp(-t * t));
+    p.rect(x, y, 1, 240, '#2e2450');
   }
-  p.circle(52, 70, 5, '#f4f0d0'); // the moon
-  p.circle(54, 69, 4, '#15204a');
-  // carved teak pillars (Shaniwar Wada style)
-  for (const px of [150, 342]) {
-    p.rect(px, 30, 10, 180, '#3e2618');
-    p.rect(px + 1, 30, 2, 180, '#5a3a24');
-    p.rect(px - 4, 30, 18, 6, '#4e3020');
-    p.rect(px - 2, 36, 14, 3, '#4e3020');
-    for (let y = 60; y < 200; y += 24) p.rect(px + 2, y, 6, 2, '#2a180e');
+  paintTempleSpire(p, 450, 128, { stone: '#3a2e5a', light: '#433666', shade: '#2e2450', trim: '#f8d070', gold: '#f8d070', pole: '#3a2e5a', flag: '#f5821f' }, 0.5);
+  for (let i = 0; i < 12; i++) p.dot(430 + i * 3, 131 + (i % 3), '#f8d070');
+
+  // mid: the fort wall
+  const wall = makeCanvas(512, 240);
+  p = PX(wall.getContext('2d'));
+  const top = 112;
+  p.rect(0, top, 512, 240 - top, '#6e4a34');
+  for (let y = top + 8; y < 240; y += 10) {
+    p.rect(0, y, 512, 1, '#5a3a28');
+    for (let x = (y / 10) % 2 ? 0 : 9; x < 512; x += 18) p.rect(x, y - 9, 1, 9, '#5a3a28');
   }
+  // petal-shaped battlements (kangoras)
+  for (let x = 2; x < 512; x += 10) {
+    p.rect(x, top - 5, 6, 5, '#6e4a34');
+    p.rect(x + 1, top - 7, 4, 2, '#6e4a34');
+    p.dot(x + 2, top - 8, '#6e4a34');
+  }
+  for (const bx of [110, 370]) {
+    // round bastion (buruj) with a saffron flag
+    p.rect(bx - 22, top - 26, 44, 240, '#7a5238');
+    p.rect(bx + 14, top - 26, 8, 240, '#62422e');
+    for (let x = bx - 22; x < bx + 22; x += 9) p.rect(x, top - 32, 6, 6, '#7a5238');
+    p.rect(bx, top - 58, 2, 30, '#3a2418');
+    for (let row = 0; row < 12; row++) p.rect(bx + 2, top - 58 + row, 16 - Math.abs(6 - row) * 2, 1, '#f5821f');
+    p.rect(bx - 4, top - 10, 8, 6, '#f8c070');
+  }
+  // the Dilli Darwaza with its iron elephant spikes
+  const gx = 240;
+  p.rect(gx - 30, top - 20, 60, 240, '#7a5238');
+  p.rect(gx - 18, top + 10, 36, 90, '#3a2014');
+  p.circle(gx, top + 12, 18, '#3a2014');
+  p.rect(gx - 16, top + 12, 32, 88, '#5a3218');
+  p.rect(gx, top + 12, 1, 88, '#3a2014');
+  for (let y = top + 22; y < top + 96; y += 12) for (let x = gx - 14; x < gx + 16; x += 7) p.rect(x, y, 2, 3, '#c8c8d0');
+  for (let x = gx - 30; x < gx + 30; x += 8) p.rect(x, top - 26, 6, 6, '#7a5238');
+
+  // near: palace arches glowing with lamplight
+  const arc = makeCanvas(384, 240);
+  p = PX(arc.getContext('2d'));
+  p.rect(0, 150, 384, 90, '#8a5e40');
+  for (let x = 0; x < 384; x += 48) {
+    p.rect(x + 8, 164, 32, 44, '#3a2216');
+    p.circle(x + 24, 166, 16, '#3a2216');
+    p.rect(x + 12, 172, 24, 36, '#f0a860');
+    p.circle(x + 24, 172, 12, '#f0a860');
+    p.rect(x + 16, 180, 16, 28, '#c07038');
+    p.rect(x, 150, 6, 58, '#6a4028'); // teak pillar
+    p.rect(x - 2, 150, 10, 4, '#7a4a2e');
+  }
+  p.rect(0, 146, 384, 5, '#a8784e');
+  for (let x = 0; x < 384; x += 6) p.rect(x, 144, 4, 2, '#a8784e');
   return {
-    sky: [['#141020', 0]],
-    layers: [{ img: wall, par: 0.5, y: 0 }],
+    sky: [['#161434', 0], ['#221c4a', 36], ['#34245a', 70], ['#56306a', 100], ['#86406e', 124], ['#c0586a', 146], ['#e87a5a', 166], ['#f4a462', 188]],
+    layers: [
+      { img: far, par: 0.12, y: 0 },
+      { img: wall, par: 0.3, y: 0 },
+      { img: arc, par: 0.55, y: 0 },
+    ],
   };
 }
 
@@ -3381,6 +3478,50 @@ const DecorPainters = {
     for (let x = 2; x < W; x += 6) lights.push([x, 25 + ((x / 6) % 2)]);
     return { img: c, ox: -8, oy: -H, lights };
   },
+  fountain() {
+    // lotus fountain like the Hazari Karanje
+    const c = makeCanvas(56, 30);
+    const p = PX(c.getContext('2d'));
+    p.rect(2, 20, 52, 10, '#c09068');
+    p.rect(2, 20, 52, 2, '#e0b890');
+    p.rect(6, 22, 44, 5, '#4a8ac8');
+    for (let i = 0; i < 6; i++) p.circle(10 + i * 7, 18, 4, i % 2 ? '#f07cb0' : '#f8a8c8');
+    p.rect(26, 6, 4, 14, '#c09068');
+    for (let i = 0; i < 9; i++) {
+      p.dot(28 - i * 2, 4 + Math.round((i * i) / 5), '#bfe4ff');
+      p.dot(28 + i * 2, 4 + Math.round((i * i) / 5), '#bfe4ff');
+    }
+    return { img: c, ox: -4, oy: -30 };
+  },
+  gate() {
+    // Dilli Darwaza, the great entrance gate of Shaniwar Wada
+    const c = makeCanvas(96, 112);
+    const g = c.getContext('2d');
+    const p = PX(g);
+    p.rect(0, 12, 96, 100, '#8a5c3a');
+    for (let y = 22; y < 112; y += 10) {
+      p.rect(0, y, 96, 1, '#6e4a30');
+      for (let x = (y / 10) % 2 ? 0 : 8; x < 96; x += 16) p.rect(x, y - 9, 1, 9, '#6e4a30');
+    }
+    for (let x = 1; x < 96; x += 10) {
+      p.rect(x, 5, 7, 7, '#8a5c3a');
+      p.rect(x + 2, 2, 3, 3, '#8a5c3a');
+    }
+    p.rect(20, 40, 56, 72, '#3a2014');
+    p.circle(48, 42, 28, '#3a2014');
+    p.rect(24, 44, 48, 68, '#6a3a1e');
+    p.circle(48, 44, 24, '#6a3a1e');
+    p.rect(47, 22, 2, 90, '#3a2014');
+    for (let y = 44; y < 108; y += 12) for (let x = 28; x < 70; x += 8) {
+      p.rect(x, y, 2, 4, '#d0d0d8');
+      p.dot(x, y - 1, '#ffffff');
+    }
+    p.rect(30, 26, 36, 9, '#1a1020');
+    Font.draw(g, 'SHANIWAR', 48, 28, '#fcd23c', { tiny: true, align: 'center' });
+    p.rect(46, -2, 2, 14, '#3a2418');
+    for (let row = 0; row < 8; row++) p.rect(48, row - 2, 10 - Math.abs(4 - row) * 2, 1, '#f5821f');
+    return { img: c, ox: 0, oy: -112 };
+  },
   basket() {
     const c = makeCanvas(40, 30);
     const p = PX(c.getContext('2d'));
@@ -3401,6 +3542,25 @@ function paintDecor(d) {
   const painter = DecorPainters[d.type];
   if (!painter) throw new Error('Unknown decor ' + d.type);
   return painter(d);
+}
+
+// Akash kandil (star lantern) swaying on a string, drawn every frame.
+function drawKandil(ctx, x, y, frame, hue) {
+  const sway = Math.round(Math.sin(frame * 0.05 + x) * 2);
+  ctx.fillStyle = '#3a2418';
+  ctx.fillRect(x + 7, 0, 1, y + 2);
+  const cx = x + 7 + sway;
+  const cols = [['#f5821f', '#fcd23c'], ['#e2352b', '#f5821f'], ['#f07cb0', '#fcd23c']][hue % 3];
+  ctx.fillStyle = cols[0];
+  ctx.fillRect(cx - 5, y + 4, 11, 7);
+  ctx.fillRect(cx - 2, y + 1, 5, 13);
+  ctx.fillRect(cx - 7, y + 6, 15, 3);
+  ctx.fillStyle = cols[1];
+  ctx.fillRect(cx - 2, y + 5, 5, 5);
+  ctx.fillStyle = (frame >> 4) % 2 ? '#fff4d0' : '#fce8a0';
+  ctx.fillRect(cx, y + 7, 1, 1);
+  ctx.fillStyle = cols[0];
+  for (let i = 0; i < 3; i++) ctx.fillRect(cx - 3 + i * 3, y + 14, 1, 4 + (i % 2) * 2);
 }
 
 // Animated wall torch (castle), drawn every frame.
@@ -4069,6 +4229,7 @@ function level1_3() {
   A.enemy('pigeon', 53, 6);
   A.ledge(57, 59, 8);
   A.ledge(62, 68, 11);
+  A.enemy('lady', 68, 10);
   A.coins(63, 67, 8);
   A.enemy('monkey', 66, 10, { smart: true });
   A.platform({ kind: 'fall', x: 71, y: 10, w: 2 });
@@ -4112,7 +4273,12 @@ function level1_3() {
 function level1_4() {
   const A = new Area('main', 162, 'castle', { music: 'castle' });
   const S = T.STONE;
-  A.fill(0, 161, 0, 2, S); // ceiling
+  // the Dilli Darwaza you walk out of, a lotus fountain and a guide board
+  A.deco('gate', 0, 10);
+  A.sign(11, ['SHANIWAR WADA.', 'BUILT IN 1732.', 'PLEASE DO NOT', 'BREAK ANYTHING.'], { y: 10 });
+  A.deco('fountain', 20);
+  A.deco('fountain', 80);
+  A.deco('fountain', 110);
 
   // entrance hall
   A.fill(0, 14, 10, 14, S);
@@ -4166,7 +4332,10 @@ function level1_4() {
   A.sign(149, ['RING BELL ONCE.', 'WE ARE NOT DEAF.'], { y: 12 });
   A.deco('basket', 155, 12);
 
-  for (const x of [5, 20, 28, 46, 64, 80, 100, 112, 128, 150]) A.deco('torch', x, 6, { anim: true });
+  for (const x of [28, 46, 64, 100, 128, 150]) A.deco('torch', x, 8, { anim: true });
+  for (const [x, y] of [[12, 3], [24, 2], [36, 4], [58, 2], [70, 3], [88, 2], [100, 4], [116, 3], [134, 2], [146, 3], [156, 2]]) {
+    A.deco('kandil', x, y, { anim: true });
+  }
 
   return {
     id: '1-4',
@@ -4295,6 +4464,15 @@ class Player extends Ent {
           this.state = 'normal';
           this.inPipe = false;
         }
+        break;
+      case 'grabbed':
+        break;
+      case 'thrown':
+        // flung over the cliff: no control, no floors
+        this.vy = Math.min(this.vy + 0.28, 6);
+        this.x += this.vx;
+        this.y += this.vy;
+        if (this.y > VIEW_H + 8) G.killPlayer('pit');
         break;
       case 'idle':
       case 'stuck':
@@ -4449,6 +4627,7 @@ class Player extends Ent {
     if (this.state === 'flag') return Math.floor(this.anim) % 2 ? 'climb2' : 'climb1';
     if (this.state === 'pipeDown' || this.state === 'pipeUp') return 'stand';
     if (this.state === 'pipeRight') return walk;
+    if (this.state === 'grabbed' || this.state === 'thrown') return 'jump';
     if (this.crouching) return 'crouch';
     if (!this.onGround) return 'jump';
     if (this.skidding && this.state === 'normal') return 'skid';
@@ -5166,6 +5345,64 @@ class Popup {
   }
 }
 
+// The lady at the Sinhagad cliff edge. Harmless, unless you hang around next to
+// her: after a couple of warnings she picks you up and throws you off the cliff.
+class Lady extends Ent {
+  constructor(tx, ty) {
+    super(tx * TILE + 2, (ty + 1) * TILE - 30, 12, 30);
+    this.wait = 0;
+    this.phase = 'idle';
+    this.phaseT = 0;
+    this.facing = -1;
+  }
+  update() {
+    this.t++;
+    const p = G.player;
+    this.facing = p.cx > this.cx ? 1 : -1;
+    if (this.phase === 'idle') {
+      const near =
+        p.state === 'normal' && p.onGround && Math.abs(p.cx - this.cx) < 26 && Math.abs(p.y + p.h - (this.y + this.h)) < 3;
+      this.wait = near ? this.wait + 1 : Math.max(0, this.wait - 3);
+      if (this.wait === 100) G.fx.push(new Bubble('...', this.cx, this.y - 14, 70));
+      if (this.wait === 210) G.fx.push(new Bubble('MOVE ALONG.', this.cx, this.y - 14, 80));
+      if (this.wait >= 300) {
+        this.phase = 'lift';
+        this.phaseT = 0;
+        p.state = 'grabbed';
+        p.vx = p.vy = 0;
+        p.star = 0;
+        G.fx.push(new Bubble('SHOO!', this.cx, this.y - 28, 60));
+        Sound.play('throwIt');
+      }
+    } else if (this.phase === 'lift') {
+      this.phaseT++;
+      // hold the hero up over her head, then toss him off the edge
+      p.x = this.cx - p.w / 2;
+      p.y = this.y - p.h - 2 - Math.min(this.phaseT, 6);
+      if (this.phaseT === 24) {
+        p.state = 'thrown';
+        p.vx = 2.4;
+        p.vy = -5.5;
+        p.facing = 1;
+        Sound.play('kick');
+        this.phase = 'rest';
+        this.phaseT = 0;
+      }
+    } else if (this.phase === 'rest') {
+      if (++this.phaseT > 120) {
+        this.phase = 'idle';
+        this.wait = 0;
+      }
+    }
+  }
+  draw(ctx) {
+    let n = 'stand';
+    if (this.phase === 'lift') n = 'throwIt';
+    else if (this.wait > 100 || this.phase === 'rest') n = (this.t >> 3) % 2 ? 'tap1' : 'tap2';
+    drawSpr(ctx, Sprites.s['lady_' + n], this.x - 2, this.y + this.h - 32, this.facing > 0);
+  }
+}
+
 // Speech bubble for honking drivers and the stuck hero.
 class Bubble {
   constructor(text, x, y, life = 70) {
@@ -5453,6 +5690,8 @@ function makeEntity(s, area) {
       return new Flame(s.x, s.y, s.delay || 0);
     case 'firebar':
       return new Firebar(s.x, s.y, s.len, s.speed);
+    case 'lady':
+      return new Lady(s.x, s.y);
   }
   throw new Error('Unknown spawn ' + s.type + ' in ' + area.name);
 }
@@ -6211,6 +6450,11 @@ function drawWorld() {
   // decor
   for (const dd of G.decor) {
     const d = dd.d;
+    if (d.type === 'kandil') {
+      const x = d.x * TILE - camX;
+      if (x > -20 && x < VIEW_W + 4) drawKandil(ctx, x, d.y * TILE, G.frame, d.x);
+      continue;
+    }
     if (d.type === 'torch') {
       const x = d.x * TILE - camX;
       if (x > -16 && x < VIEW_W) drawTorch(ctx, x, d.y * TILE, G.frame + d.x * 7);

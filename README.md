@@ -10,8 +10,8 @@ The naughty **Makad Raja** (the Monkey King of Sinhagad) has run off with all th
 | --- | --- | --- |
 | 1-1 | Peth Streets | Wadas, the Parvati hill temple, Ganeshotsav pandals with twinkling lights, chai and vada pav stalls, Puneri signboards, a secret pipe to a coin room, and a Pune traffic jam where the hero gets stuck (hop along the roofs!) |
 | 1-2 | Metro Station | Inside a Pune Metro station: ticket gates, screen doors with trains gliding past, benches, route maps and next-train displays, plus metro lifts over a pit |
-| 1-3 | Sinhagad Climb | Sunset over the Sahyadris, fort pillars, crumbling stones, moving ledges and pigeons |
-| 1-4 | Shaniwar Wada | Fire bars, lava, jumping flames and the Makad Raja boss on the bridge |
+| 1-3 | Sinhagad Climb | Sunset over the Sahyadris, fort pillars, crumbling stones, moving ledges, pigeons, and a lady at the cliff edge who throws you off if you stand next to her for 5 seconds |
+| 1-4 | Shaniwar Wada | The fort at dusk: the Dilli Darwaza gate, sandstone walls with saffron flags, kandil lanterns and lotus fountains, plus fire bars, lava, jumping flames and the Makad Raja boss on the bridge |
 
 ## Play it
 

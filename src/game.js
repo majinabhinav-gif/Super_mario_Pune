@@ -144,6 +144,8 @@ function makeEntity(s, area) {
       return new Flame(s.x, s.y, s.delay || 0);
     case 'firebar':
       return new Firebar(s.x, s.y, s.len, s.speed);
+    case 'lady':
+      return new Lady(s.x, s.y);
   }
   throw new Error('Unknown spawn ' + s.type + ' in ' + area.name);
 }
@@ -902,6 +904,11 @@ function drawWorld() {
   // decor
   for (const dd of G.decor) {
     const d = dd.d;
+    if (d.type === 'kandil') {
+      const x = d.x * TILE - camX;
+      if (x > -20 && x < VIEW_W + 4) drawKandil(ctx, x, d.y * TILE, G.frame, d.x);
+      continue;
+    }
     if (d.type === 'torch') {
       const x = d.x * TILE - camX;
       if (x > -16 && x < VIEW_W) drawTorch(ctx, x, d.y * TILE, G.frame + d.x * 7);
