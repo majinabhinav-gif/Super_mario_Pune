@@ -1365,6 +1365,7 @@ function render() {
 
 // ----------------------------------------------------------------- loop --
 function step() {
+  if (G.rotatePrompt) return;
   Input.update();
   if (Input.pressed('mute')) Sound.toggleMute();
   G.frame++;
@@ -1433,6 +1434,43 @@ function closeNameEntry(save) {
   Input.clear();
 }
 
+// ------------------------------------------------------ rotate prompt ---
+// Phones held upright get a full-screen "turn sideways" card; the game waits behind it.
+function setupRotatePrompt(isTouch) {
+  const box = document.getElementById('rotate');
+  if (!box || !isTouch) return;
+  const full = document.getElementById('rotate-full');
+  const skip = document.getElementById('rotate-skip');
+  let keptUpright = false;
+  const canLock = !!(screen.orientation && screen.orientation.lock && document.documentElement.requestFullscreen);
+  full.hidden = !canLock;
+  const check = () => {
+    const portrait = window.innerHeight > window.innerWidth;
+    const show = portrait && !keptUpright;
+    if (show && box.hidden && G.state === 'play' && G.player && G.player.state === 'normal') G.paused = true;
+    box.hidden = !show;
+    G.rotatePrompt = show;
+    setTimeout(resize, 50);
+  };
+  skip.addEventListener('click', () => {
+    keptUpright = true;
+    check();
+  });
+  full.addEventListener('click', async () => {
+    Sound.init();
+    try {
+      await document.documentElement.requestFullscreen();
+      await screen.orientation.lock('landscape');
+    } catch (e) {
+      /* not allowed here (for example inside a frame): the player can still rotate by hand */
+    }
+    check();
+  });
+  window.addEventListener('resize', check);
+  window.addEventListener('orientationchange', () => setTimeout(check, 200));
+  check();
+}
+
 // ----------------------------------------------------------------- boot --
 function boot(saved) {
   buildSprites();
@@ -1488,6 +1526,7 @@ function boot(saved) {
     });
     muteBtn.classList.toggle('off', Sound.isMuted());
   }
+  setupRotatePrompt(isTouch);
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
       if (G.state === 'play' && G.player && G.player.state === 'normal') G.paused = true;

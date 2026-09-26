@@ -35,7 +35,7 @@ You can also add the name to the link, for example `super-punekar.html#AARAV`.
 | Pause | Enter, P or Esc | ❚❚ | Start |
 | Sound on/off | M | 🔈 | |
 
-Phones play best held sideways.
+Phones play best held sideways: holding one upright shows a "turn your phone sideways" card (with a full-screen button on phones that support it, and an option to keep playing upright). The touch buttons resize to fit the screen.
 
 ### Power-ups
 
