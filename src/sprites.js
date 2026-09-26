@@ -14,10 +14,10 @@ const BASE_PAL = {
 // A Pune kid in a white Maharashtrian topi, a kurta and pyjama, with chappals.
 // Roles: W/w/k topi, R/r kurta, Y kurta buttons, B/b pyjama, S/s skin, H hair, N chappals.
 const HERO_SMALL_HEAD = [
-  '....kkkkkkk.....',
-  '...kWWWWWWWk....',
-  '..kWWWWWWWWWk...',
-  '..kwwwwwwwwwk...',
+  '..kkkk..........',
+  '..kWWWkkkkk.....',
+  '..kWWWWWWWWkkk..',
+  '..kwwwwwwwwwwwk.',
   '..HHHHSSSSKS....',
   '.HHHSSSSSSKSS...',
   '.HHHSSSSSSSSSS..',
@@ -99,8 +99,8 @@ const HERO_SMALL_BODY = {
   ],
 };
 const HERO_SMALL_DIE = [
-  '....kkkkkkkk....',
-  '...kWWWWWWWWk...',
+  '.......kk.......',
+  '....kkkWWkkk....',
   '...kwwwwwwwwk...',
   '..HHSSSSSSSSHH..',
   '.SHSSKSSSSKSSHS.',
@@ -118,12 +118,12 @@ const HERO_SMALL_DIE = [
 ];
 
 const HERO_BIG_HEAD = [
-  '................',
-  '.....kkkkkkk....',
-  '....kWWWWWWWk...',
-  '...kWWWWWWWWWk..',
-  '...kWWWWWWWWWk..',
-  '..kwwwwwwwwwwwk.',
+  '..kkk...........',
+  '..kWWkkkk.......',
+  '..kWWWWWWkkkk...',
+  '..kWWWWWWWWWWkk.',
+  '..kwwwwwwwwwwwwk',
+  '..kkkkkkkkkkkkk.',
   '..HHHHHHSSSSSS..',
   '.HHHHHSSSSSKSS..',
   '.HHHHSSSSSSKSSS.',
