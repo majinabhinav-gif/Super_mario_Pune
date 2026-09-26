@@ -851,6 +851,14 @@ function drawWorld() {
     const x = d.x * TILE + dd.ox - camX;
     if (x > VIEW_W || x + dd.img.width < 0) continue;
     ctx.drawImage(dd.img, x, d.y * TILE + dd.oy);
+    if (dd.lights) {
+      const cols = ['#ff5a5a', '#fcd23c', '#5ae07a', '#5ab4ff', '#f07cb0'];
+      dd.lights.forEach(([lx, ly], i) => {
+        if ((i + (G.frame >> 3)) % 3 === 0) return;
+        ctx.fillStyle = cols[(i + (G.frame >> 5)) % cols.length];
+        ctx.fillRect(x + lx, d.y * TILE + dd.oy + ly, 2, 2);
+      });
+    }
   }
   // things that live behind tiles
   for (const e of G.ents) if (e.behindTiles && e.awake) e.draw(ctx);
@@ -1140,7 +1148,7 @@ function renderIntro() {
   ctx.fillStyle = '#000000';
   ctx.fillRect(0, 0, VIEW_W, VIEW_H);
   const lv = G.levelIndex;
-  const names = ['PETH STREETS', 'METRO TUNNEL', 'SINHAGAD CLIMB', 'SHANIWAR WADA'];
+  const names = ['PETH STREETS', 'METRO STATION', 'SINHAGAD CLIMB', 'SHANIWAR WADA'];
   G.level = G.level && G.level.id === '1-' + (lv + 1) ? G.level : { id: '1-' + (lv + 1) };
   drawHUD();
   Font.draw(ctx, 'WORLD 1-' + (lv + 1), VIEW_W / 2, 80, '#ffffff', { align: 'center' });

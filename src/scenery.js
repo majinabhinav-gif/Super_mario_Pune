@@ -295,6 +295,99 @@ function buildUndergroundBG() {
   };
 }
 
+// Inside a Pune Metro station: ceiling lights, the purple/aqua line band and
+// platform screen doors. The glass is left see-through so trains can pass behind it.
+function buildMetroBG() {
+  const W = 384;
+  const back = makeCanvas(W, 240);
+  let p = PX(back.getContext('2d'));
+  p.rect(0, 0, W, 240, '#121824');
+  p.rect(0, 150, W, 50, '#0c1018');
+  for (let x = 20; x < W; x += 96) p.rect(x, 120, 6, 2, '#39445a');
+  p.rect(0, 196, W, 3, '#3a3f4a'); // rail
+
+  const front = makeCanvas(W, 240);
+  const fg = front.getContext('2d');
+  p = PX(fg);
+  // ceiling panels and light strips
+  p.rect(0, 0, W, 60, '#cdd2dc');
+  for (let x = 0; x < W; x += 32) p.rect(x, 0, 1, 60, '#b2b8c4');
+  for (let x = 6; x < W; x += 48) {
+    p.rect(x, 42, 26, 4, '#fffbe6');
+    p.rect(x - 1, 46, 28, 1, '#a8aebb');
+  }
+  // header band with the metro line colours
+  p.rect(0, 60, W, 14, '#262b36');
+  p.rect(0, 67, W, 3, '#7a4ab0');
+  p.rect(0, 70, W, 2, '#3cc0c8');
+  // platform screen doors: [frame][fixed glass][frame][door][seam][door][frame]
+  for (let m = 0; m < W; m += 96) {
+    const frame = (x, w) => {
+      p.rect(m + x, 74, w, 126, '#aeb6c4');
+      p.rect(m + x, 74, 1, 126, '#d8dde6');
+    };
+    frame(0, 4);
+    frame(42, 4);
+    frame(68, 2);
+    frame(92, 4);
+    fg.fillStyle = 'rgba(160, 205, 235, 0.16)';
+    fg.fillRect(m + 4, 74, 38, 126);
+    fg.fillRect(m + 46, 74, 22, 126);
+    fg.fillRect(m + 70, 74, 22, 126);
+    fg.fillStyle = 'rgba(255, 255, 255, 0.35)';
+    fg.fillRect(m + 8, 80, 2, 30);
+    fg.fillRect(m + 50, 80, 2, 20);
+    p.rect(m + 52, 140, 12, 3, '#f5821f');
+    p.rect(m + 74, 140, 12, 3, '#f5821f');
+    p.rect(m + 66, 76, 6, 3, '#2ad06a');
+    p.rect(m + 4, 196, 88, 4, '#8a92a0');
+  }
+  p.rect(0, 200, W, 8, '#9ca3b0');
+  p.rect(0, 200, W, 1, '#c4cad4');
+  return {
+    sky: [['#121824', 0]],
+    layers: [
+      { img: back, par: 0.5, y: 0 },
+      { train: true },
+      { img: front, par: 0.5, y: 0 },
+    ],
+  };
+}
+
+// A metro train glides past behind the screen doors every so often.
+function drawTrain(ctx, frame) {
+  const t = frame % 1000;
+  const len = 640;
+  const x0 = Math.round(VIEW_W + 40 - t * 4.5);
+  if (x0 + len < -20) return;
+  const top = 92;
+  const h = 102;
+  ctx.fillStyle = '#e6eaf0';
+  ctx.fillRect(x0, top, len, h);
+  ctx.fillStyle = '#c6ccd6';
+  ctx.fillRect(x0, top + h - 10, len, 10);
+  ctx.fillStyle = '#7a4ab0';
+  ctx.fillRect(x0, top + 58, len, 6);
+  ctx.fillStyle = '#3cc0c8';
+  ctx.fillRect(x0, top + 64, len, 3);
+  for (let c = 0; c < len; c += 160) {
+    ctx.fillStyle = '#9aa2ae';
+    ctx.fillRect(x0 + c, top, 2, h);
+    for (let w = 14; w < 150; w += 34) {
+      ctx.fillStyle = '#2a3654';
+      ctx.fillRect(x0 + c + w, top + 16, 22, 30);
+      ctx.fillStyle = '#f6eec8';
+      ctx.fillRect(x0 + c + w, top + 16, 22, 3);
+    }
+  }
+  ctx.fillStyle = '#e6eaf0';
+  ctx.fillRect(x0 - 8, top + 10, 8, h - 10);
+  ctx.fillStyle = '#2a3654';
+  ctx.fillRect(x0 - 6, top + 16, 12, 26);
+  ctx.fillStyle = '#fff8c0';
+  ctx.fillRect(x0 - 7, top + 76, 4, 4);
+}
+
 function buildSkyBG() {
   const far = makeCanvas(640, 240);
   let p = PX(far.getContext('2d'));
@@ -392,6 +485,7 @@ const Backgrounds = {};
 function buildBackgrounds() {
   Backgrounds.overworld = buildOverworldBG();
   Backgrounds.underground = buildUndergroundBG();
+  Backgrounds.metro = buildMetroBG();
   Backgrounds.sky = buildSkyBG();
   Backgrounds.castle = buildCastleBG();
 }
@@ -406,6 +500,10 @@ function drawBackground(ctx, theme, camX, frame) {
     ctx.fillRect(0, y0, VIEW_W, y1 - y0);
   }
   for (const L of bg.layers) {
+    if (L.train) {
+      drawTrain(ctx, frame);
+      continue;
+    }
     const w = L.img.width;
     const off = camX * L.par + (L.drift ? frame * L.drift : 0);
     let x = -(((off % w) + w) % w);
@@ -594,6 +692,121 @@ const DecorPainters = {
       for (let x = off; x < w; x += 12) p.rect(x, y - 7, 1, 7, '#544a3e');
     }
     return { img: c, ox: 0, oy: -(h + 8) };
+  },
+  // ---- metro station furniture ----
+  bench() {
+    const c = makeCanvas(40, 16);
+    const p = PX(c.getContext('2d'));
+    p.rect(0, 5, 40, 3, '#c8ced8');
+    p.rect(0, 5, 40, 1, '#eef1f5');
+    p.rect(2, 0, 36, 4, '#7a4ab0');
+    p.rect(4, 8, 2, 8, '#5a606c');
+    p.rect(34, 8, 2, 8, '#5a606c');
+    p.rect(18, 8, 4, 8, '#5a606c');
+    return { img: c, ox: 0, oy: -16 };
+  },
+  gates() {
+    const c = makeCanvas(56, 26);
+    const p = PX(c.getContext('2d'));
+    for (const x of [0, 20, 40]) {
+      p.rect(x, 4, 14, 22, '#b8bec9');
+      p.rect(x, 4, 14, 2, '#e4e8ee');
+      p.rect(x + 3, 8, 8, 5, '#1a2230');
+      p.rect(x + 5, 9, 4, 3, x === 20 ? '#e2352b' : '#2ad06a');
+    }
+    p.rect(14, 14, 6, 2, '#f5821f');
+    p.rect(34, 14, 6, 2, '#f5821f');
+    return { img: c, ox: 0, oy: -26 };
+  },
+  screen(d) {
+    const lines = d.lines || ['NEXT TRAIN', '2 MIN'];
+    const w = Math.max(...lines.map((l) => l.length)) * 4 + 8;
+    const c = makeCanvas(w, lines.length * 7 + 12);
+    const g = c.getContext('2d');
+    const p = PX(g);
+    p.rect(w / 2 - 1, 0, 2, 6, '#5a606c');
+    p.rect(0, 6, w, lines.length * 7 + 6, '#3a404c');
+    p.rect(1, 7, w - 2, lines.length * 7 + 4, '#0a0c10');
+    lines.forEach((ln, i) => Font.draw(g, ln, w / 2, 9 + i * 7, '#ffb030', { tiny: true, align: 'center' }));
+    return { img: c, ox: 0, oy: 0 };
+  },
+  exitSign(d) {
+    const text = d.text || 'EXIT';
+    const w = text.length * 4 + 16;
+    const c = makeCanvas(w, 16);
+    const g = c.getContext('2d');
+    const p = PX(g);
+    p.rect(w / 2 - 1, 0, 2, 5, '#5a606c');
+    p.rect(0, 5, w, 11, '#1e8a3e');
+    p.rect(1, 6, w - 2, 9, '#27a84c');
+    p.rect(3, 8, 5, 5, '#ffffff');
+    p.rect(4, 9, 3, 3, '#27a84c');
+    Font.draw(g, text, 10, 8, '#ffffff', { tiny: true });
+    return { img: c, ox: 0, oy: 0 };
+  },
+  routeMap() {
+    const c = makeCanvas(72, 40);
+    const g = c.getContext('2d');
+    const p = PX(g);
+    p.rect(0, 0, 72, 40, '#5a606c');
+    p.rect(1, 1, 70, 38, '#f6f7f9');
+    Font.draw(g, 'PUNE METRO', 36, 3, '#1a2230', { tiny: true, align: 'center' });
+    p.rect(6, 16, 60, 2, '#7a4ab0');
+    p.rect(36, 11, 2, 26, '#3cc0c8');
+    for (let x = 8; x <= 64; x += 8) p.rect(x - 1, 15, 3, 4, '#ffffff');
+    for (let y = 13; y <= 34; y += 7) p.rect(35, y, 4, 3, '#ffffff');
+    p.circle(37, 17, 3, '#1a2230');
+    p.circle(37, 17, 1, '#f5821f');
+    Font.draw(g, 'YOU ARE HERE', 36, 30, '#b01818', { tiny: true, align: 'center' });
+    return { img: c, ox: 0, oy: -40 };
+  },
+  // ---- Ganeshotsav pandal ----
+  pandal() {
+    const W = 96;
+    const H = 100;
+    const c = makeCanvas(W, H);
+    const g = c.getContext('2d');
+    const p = PX(g);
+    // back curtain with a golden halo, and the stage
+    p.rect(8, 26, 80, 66, '#7a1a22');
+    for (let x = 12; x < 88; x += 8) p.rect(x, 26, 1, 66, '#6a141c');
+    for (let y = 34; y < 90; y += 12) for (let x = 14; x < 86; x += 12) p.dot(x + ((y / 12) % 2) * 6, y, '#e0a030');
+    p.circle(48, 58, 22, '#a82a26');
+    p.circle(48, 58, 20, '#f2b030');
+    p.circle(48, 58, 17, '#a82a26');
+    p.rect(26, 82, 44, 10, '#c89030');
+    p.rect(26, 82, 44, 2, '#f2d060');
+    // the idol
+    g.drawImage(Sprites.s.ganesha.img, 36, 54);
+    // offerings: a plate of modaks and two diyas
+    p.rect(40, 92, 16, 2, '#d8b040');
+    for (const [x, y] of [[43, 88], [48, 88], [53, 88], [45.5, 85], [50.5, 85]]) {
+      p.circle(x, y + 2, 2, '#fbf6e8');
+      p.dot(x, y - 1, '#f5821f');
+    }
+    for (const x of [28, 64]) {
+      p.rect(x, 91, 5, 3, '#b0561a');
+      p.rect(x + 2, 88, 1, 3, '#fcd23c');
+    }
+    // bamboo poles
+    for (const x of [4, 88]) {
+      p.rect(x, 18, 4, 82, '#c8a060');
+      for (let y = 26; y < 100; y += 14) p.rect(x, y, 4, 1, '#8a6a30');
+    }
+    // canopy with a scalloped edge
+    p.roof(48, 0, 100, 9, '#f5821f');
+    p.rect(0, 8, W, 12, '#e2352b');
+    p.rect(0, 8, W, 2, '#f5821f');
+    for (let x = 0; x < W; x += 8) p.circle(x + 4, 20, 4, x % 16 ? '#fcd23c' : '#e2352b');
+    Font.draw(g, 'GANPATI BAPPA MORYA', 48, 12, '#fff4d0', { tiny: true, align: 'center' });
+    // marigold garlands
+    for (let i = 0; i < 5; i++) {
+      const gx = 12 + i * 18;
+      for (let y = 25; y < 40 + (i % 2) * 8; y += 2) p.dot(gx, y, y % 4 ? '#f07010' : '#fcd23c');
+    }
+    const lights = [];
+    for (let x = 2; x < W; x += 6) lights.push([x, 25 + ((x / 6) % 2)]);
+    return { img: c, ox: -8, oy: -H, lights };
   },
   basket() {
     const c = makeCanvas(40, 30);

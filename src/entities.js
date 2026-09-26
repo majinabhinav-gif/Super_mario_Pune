@@ -878,6 +878,7 @@ class Platform extends Ent {
     const pal = {
       overworld: ['#b87a3a', '#e0a860', '#6a3e18'],
       underground: ['#8a96aa', '#d8e0ec', '#3a4458'],
+      metro: ['#8a96aa', '#d8e0ec', '#3a4458'],
       sky: ['#9a8e7a', '#c8bca6', '#4a4034'],
       castle: ['#8a8698', '#bab6c8', '#3a3848'],
     }[this.theme];
@@ -889,7 +890,7 @@ class Platform extends Ent {
     ctx.fillRect(x + 1, y + 1, this.w - 2, 1);
     ctx.fillStyle = pal[2];
     for (let i = 8; i < this.w; i += 16) ctx.fillRect(x + i, y + 2, 1, 4);
-    if (this.theme === 'underground') {
+    if (this.theme === 'underground' || this.theme === 'metro') {
       ctx.fillStyle = '#f8d030';
       for (let i = 2; i < this.w - 2; i += 6) ctx.fillRect(x + i, y + 6, 3, 1);
     }

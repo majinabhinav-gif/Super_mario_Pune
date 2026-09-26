@@ -8,8 +8,8 @@ The naughty **Makad Raja** (the Monkey King of Sinhagad) has run off with all th
 
 | Level | Name | What's there |
 | --- | --- | --- |
-| 1-1 | Peth Streets | Wadas, the Parvati hill temple, chai and vada pav stalls, Puneri signboards, and a secret pipe to a coin room |
-| 1-2 | Metro Tunnel | Brick galleries, cobras in the pipes, metro lifts over a pit, and stations from PCMC to Shivajinagar |
+| 1-1 | Peth Streets | Wadas, the Parvati hill temple, Ganeshotsav pandals with twinkling lights, chai and vada pav stalls, Puneri signboards, and a secret pipe to a coin room |
+| 1-2 | Metro Station | Inside a Pune Metro station: ticket gates, screen doors with trains gliding past, benches, route maps and next-train displays, plus metro lifts over a pit |
 | 1-3 | Sinhagad Climb | Sunset over the Sahyadris, fort pillars, crumbling stones, moving ledges and pigeons |
 | 1-4 | Shaniwar Wada | Fire bars, lava, jumping flames and the Makad Raja boss on the bridge |
 

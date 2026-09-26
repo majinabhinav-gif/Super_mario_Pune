@@ -8,9 +8,9 @@ function level1_1() {
   A.ground(0, 66).ground(69, 84).ground(88, 152).ground(155, 211);
 
   // decor first (drawn behind everything)
-  A.deco('lamp', 2).deco('bunting', 3, 3, { w: 9 }).deco('lamp', 12);
-  A.sign(5, ['WELCOME TO PUNE!', 'STOMP THE AUTOS.', 'PLEASE DO NOT', 'ASK DIRECTIONS.']);
-  A.deco('bush', 9, 13, { size: 2 });
+  A.deco('lamp', 1).deco('bunting', 2, 3, { w: 12 }).deco('lamp', 14);
+  A.sign(3, ['WELCOME TO PUNE!', 'STOMP THE AUTOS.', 'PLEASE DO NOT', 'ASK DIRECTIONS.']);
+  A.deco('pandal', 8);
   A.deco('tree', 23, 13, { size: 28 });
   A.deco('stall', 30, 13, { kind: 'chai' });
   A.sign(41, ['SHOP CLOSED', '1 PM TO 4 PM.', 'DO NOT KNOCK.']);
@@ -21,12 +21,13 @@ function level1_1() {
   A.deco('lamp', 70).deco('bunting', 71, 3, { w: 10 }).deco('lamp', 81);
   A.deco('tree', 93, 13, { size: 24, kind: 'neem' });
   A.deco('stall', 97, 13, { kind: 'vadapav' });
-  A.deco('bush', 106, 13, { size: 3 });
+  A.deco('pandal', 104);
   A.deco('tree', 116, 13, { size: 30 });
   A.deco('lamp', 126).deco('tulsi', 132);
   A.deco('stall', 145, 13, { kind: 'misal' });
   A.sign(160, ['NO HONKING.', 'IT WILL NOT', 'HELP YOU JUMP.']);
-  A.deco('bush', 175, 13, { size: 2 });
+  A.deco('bunting', 158, 3, { w: 12 });
+  A.deco('pandal', 172);
   A.sign(191, ['YES, THIS IS THE', 'RIGHT WAY. DO', 'NOT ASK AGAIN.']);
   A.deco('lamp', 196);
 
@@ -99,13 +100,19 @@ function level1_1() {
 }
 
 function level1_2() {
-  const A = new Area('main', 192, 'underground', { music: 'metro' });
+  const A = new Area('main', 192, 'metro', { music: 'metro' });
   A.ground(0, 57).ground(61, 121).ground(125, 145).ground(164, 191);
   A.fill(0, 0, 3, 12, T.BRICK);
   A.row(T.BRICK, 6, 191, 2);
 
-  A.deco('metroSign', 3, 4, { text: 'PCMC' });
-  A.sign(6, ['METRO TUNNEL.', 'AUTOS ARE VERY', 'ANGRY ABOUT IT.']);
+  // station furniture (all background, nothing here is solid)
+  A.deco('gates', 1).deco('routeMap', 12, 11).deco('bench', 20).deco('screen', 26, 5);
+  A.deco('bench', 44).deco('exitSign', 58, 5, { text: 'PLATFORM 1' }).deco('bench', 82);
+  A.deco('screen', 95, 5, { lines: ['NEXT TRAIN', 'CIVIL COURT'] }).deco('routeMap', 120, 11);
+  A.deco('bench', 130).deco('screen', 160, 5, { lines: ['MIND THE GAP'] }).deco('bench', 166);
+  A.deco('exitSign', 180, 5, { text: 'EXIT' });
+  A.deco('metroSign', 4, 5, { text: 'PCMC' });
+  A.sign(6, ['METRO STATION.', 'AUTOS ARE VERY', 'ANGRY ABOUT IT.']);
   A.q(10, 9, 'power');
   for (let x = 11; x <= 14; x++) A.q(x, 9, 'coin');
   A.enemy('auto', 17).enemy('auto', 19);
@@ -115,7 +122,7 @@ function level1_2() {
   A.fill(28, 28, 10, 12, T.BRICK).coins(28, 28, 9);
   A.fill(32, 32, 9, 12, T.BRICK).coins(32, 32, 8);
   A.enemy('monkey', 30);
-  A.deco('metroSign', 34, 4, { text: 'SWARGATE' });
+  A.deco('metroSign', 34, 5, { text: 'SWARGATE' });
 
   // brick gallery
   A.bricks(40, 52, 9);
@@ -129,7 +136,7 @@ function level1_2() {
   A.stairs(61, 3, -1);
   A.enemy('monkey', 70, 12, { smart: true });
   A.stairs(66, 2, 1).stairs(72, 2, -1);
-  A.deco('metroSign', 76, 4, { text: 'CIVIL COURT' });
+  A.deco('metroSign', 70, 5, { text: 'CIVIL COURT' });
   A.checkpoint(80);
   A.q(84, 9, 'coin').q(85, 9, 'power').q(86, 9, 'coin');
   A.hidden(91, 9, 'modak');
@@ -146,7 +153,7 @@ function level1_2() {
   A.bricks(128, 134, 9);
   A.brick(131, 9, 'dhol').brick(133, 9, 'coins');
   A.enemy('monkey', 132).enemy('auto', 136);
-  A.deco('metroSign', 138, 4, { text: 'SHIVAJINAGAR' });
+  A.deco('metroSign', 136, 5, { text: 'SHIVAJINAGAR' });
 
   // metro lifts over the big pit
   A.platform({ kind: 'move', axis: 'y', x: 148, y: 9, w: 3, min: 6, max: 12, speed: 0.6 });
@@ -170,7 +177,7 @@ function level1_2() {
 
   return {
     id: '1-2',
-    name: 'METRO TUNNEL',
+    name: 'METRO STATION',
     time: 400,
     areas: { main: A, exit: E },
     start: { area: 'main', tx: 3, ty: 12 },

@@ -998,6 +998,14 @@ const THEME_PALS = {
     hard: { a: '#5c6a80', b: '#222a38', c: '#94a4bc', d: '#4e5a6e' },
     pipe: { K: '#0f2c12', a: '#3caa44', b: '#1f6e2a', c: '#9ae67a', L: '#e4ffd0' },
   },
+  metro: {
+    ground: { a: '#b4b8c2', b: '#5c6270', c: '#e2e5ec', d: '#a2a6b2', L: '#f8d030', G: '#e0b020', g: '#8a8f9c' },
+    brick: { a: '#7a4ab0', b: '#321a58', c: '#ac80dc', d: '#6a3ea0' },
+    qblock: { a: '#f0a020', b: '#8a4a10', c: '#ffe08a', K: '#5a2a08', q: '#fff4d0' },
+    used: { a: '#7a6048', b: '#2e2018', c: '#a08468', K: '#2e2018' },
+    hard: { a: '#8a94a4', b: '#3a404c', c: '#c8d0dc', d: '#7a8494' },
+    pipe: { K: '#0f2c12', a: '#3caa44', b: '#1f6e2a', c: '#9ae67a', L: '#e4ffd0' },
+  },
   sky: {
     ground: { a: '#8e8270', b: '#3e362c', c: '#c4b8a2', d: '#7a6e5e', L: '#a8e070', G: '#5aa840', g: '#357a30' },
     brick: { a: '#9a6a48', b: '#3e2616', c: '#c8966c', d: '#86583a' },
@@ -1018,6 +1026,59 @@ const THEME_PALS = {
     pipe: { K: '#0f2c12', a: '#3caa44', b: '#1f6e2a', c: '#9ae67a', L: '#e4ffd0' },
   },
 };
+
+// Ganesha idol for the festival pandals (front view, 24x28). Most rows are
+// symmetric, so only the left half is written and mirrored; the trunk and the
+// single tusk are drawn on top afterwards.
+const GANESHA_LEFT = [
+  '..........yY',
+  '.........yYY',
+  '.........YRY',
+  '........yYYY',
+  '........YYGY',
+  '.......yYYYY',
+  '..ssss.yyyyy',
+  '.sSSSSsSSSSS',
+  'sSSPSSSSSKWS',
+  'sSPPSSSSSSSS',
+  'sSSPSSSSSSSS',
+  'sSSSSSSSSSSS',
+  '.sSSSSsSSSSS',
+  '..sSSs.SSSSS',
+  '.......sSSSS',
+  '...SS..RSSSS',
+  '..SSSSRRRSSS',
+  '..SSSRRRRRSS',
+  '..SS.RRRRRRS',
+  '..SW.RRRRRRS',
+  '.....SSSSSSS',
+  '....SSSSSSSS',
+  '....SSSSSSSS',
+  '...OOOSSSSSS',
+  '..OOOOOOOOOO',
+  '.OOOOOOOOOOO',
+  'PPPPPPPPPPPP',
+  '.pPpPpPpPpPp',
+];
+function ganeshaRows() {
+  const rows = GANESHA_LEFT.map((l) => (l + l.split('').reverse().join('')).split(''));
+  const put = (x, y, c) => (rows[y][x] = c);
+  // trunk: runs down the middle and curls to the right
+  for (let y = 11; y <= 17; y++) {
+    put(10, y, 's');
+    put(13, y, y < 17 ? 's' : 'S');
+    put(11, y, 'S');
+    put(12, y, 'S');
+  }
+  put(11, 18, 's');
+  put(12, 18, 's');
+  put(13, 18, 's');
+  put(14, 17, 's');
+  put(14, 16, 's');
+  put(15, 16, 's');
+  put(9, 13, 'W'); // tusk
+  return rows.map((r) => r.join(''));
+}
 
 // ---------------------------------------------------------------- build ----
 function paintRows(rows, pal, name) {
@@ -1093,6 +1154,11 @@ function buildSprites() {
     SPR_DEFS.fireball.map((r) => r.split('').reverse().join('')).reverse(),
     null,
     'fireball2'
+  );
+  Sprites.s.ganesha = makeSprite(
+    ganeshaRows(),
+    { S: '#f4a26e', s: '#c0703e', P: '#f07cb0', p: '#b04070', O: '#fcd23c', R: '#d8302a' },
+    'ganesha'
   );
   const bossPal = { N: '#6a4a3a', T: '#e8b890' };
   for (const f in BOSS_BOTTOM) {
