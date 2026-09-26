@@ -1,6 +1,6 @@
 # Super Punekar
 
-A retro platformer set in Pune, made for one young fan of the classic jump-and-stomp games.
+A retro platformer set in Pune, made for one young fan of the classic jump-and-stomp games. The hero wears a white Maharashtrian topi and a saffron kurta (green once he eats a mirchi).
 
 The naughty **Makad Raja** (the Monkey King of Sinhagad) has run off with all the modaks for Ganeshotsav. Run across Pune, stomp angry auto-rickshaws, kick monkeys, ride the metro lifts, climb Sinhagad and ring the bell in Shaniwar Wada to win them back.
 
