@@ -5364,7 +5364,7 @@ class Lady extends Ent {
         p.state === 'normal' && p.onGround && Math.abs(p.cx - this.cx) < 26 && Math.abs(p.y + p.h - (this.y + this.h)) < 3;
       this.wait = near ? this.wait + 1 : Math.max(0, this.wait - 3);
       if (this.wait === 100) G.fx.push(new Bubble('...', this.cx, this.y - 14, 70));
-      if (this.wait === 210) G.fx.push(new Bubble('MOVE ALONG.', this.cx, this.y - 14, 80));
+      if (this.wait === 210) G.fx.push(new Bubble('COME HERE.', this.cx, this.y - 14, 80));
       if (this.wait >= 300) {
         this.phase = 'lift';
         this.phaseT = 0;
