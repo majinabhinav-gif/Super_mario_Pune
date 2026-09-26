@@ -23,11 +23,12 @@ const T = {
   SPIPE_MB: 17,
   SPIPE_T: 18,
   SPIPE_B: 19,
+  VEHICLE: 20, // invisible solid box under a traffic-jam vehicle drawing
 };
 
 const SOLID = new Uint8Array(32);
 [T.GROUND, T.BRICK, T.QBLOCK, T.USED, T.HARD, T.PIPE_TL, T.PIPE_TR, T.PIPE_L, T.PIPE_R, T.STONE, T.BRIDGE,
-  T.SPIPE_MT, T.SPIPE_MB, T.SPIPE_T, T.SPIPE_B].forEach((t) => (SOLID[t] = 1));
+  T.SPIPE_MT, T.SPIPE_MB, T.SPIPE_T, T.SPIPE_B, T.VEHICLE].forEach((t) => (SOLID[t] = 1));
 
 class Area {
   constructor(name, width, theme, opts = {}) {
@@ -48,6 +49,7 @@ class Area {
     this.checkpoints = [];
     this.boss = null;
     this.bgTint = opts.bgTint || null;
+    this.jam = null; // traffic jam gag: { x0, x1 } in tiles
     this.cameraMaxX = null;
   }
   inBounds(x, y) {
@@ -161,6 +163,15 @@ class Area {
   lavaPit(x0, x1, top = 13) {
     this.fill(x0, x1, top, ROWS - 1, T.LAVA);
     this.lava.push({ x0, x1, y: top });
+    return this;
+  }
+  // a stuck vehicle: drawn as decor, solid so the hero can hop along the roofs
+  vehicle(kind, x, w, h) {
+    this.fill(x, x + w - 1, 13 - h, 12, T.VEHICLE);
+    this.decor.push({ type: 'vehicle', kind, x, y: 13, w, h, jam: true });
+    if (!this.jam) this.jam = { x0: x, x1: x + w - 1 };
+    this.jam.x0 = Math.min(this.jam.x0, x);
+    this.jam.x1 = Math.max(this.jam.x1, x + w - 1);
     return this;
   }
   enemy(type, x, y = 12, opts = {}) {

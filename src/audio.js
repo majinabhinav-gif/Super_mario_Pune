@@ -550,6 +550,14 @@ const Sound = (() => {
     },
     bossFall: (t) => osc(t, 500, 1.6, { wave: 'pulse25', vol: 0.12, slide: 50 }),
     throwIt: (t) => noise(t, 0.12, { type: 'bandpass', freq: 1500, slideFreq: 600, vol: 0.12 }),
+    honk: (t) => {
+      osc(t, 415, 0.22, { wave: 'pulse50', vol: 0.09 });
+      osc(t, 523, 0.22, { wave: 'pulse25', vol: 0.07 });
+    },
+    honkLow: (t) => {
+      osc(t, 196, 0.35, { wave: 'pulse50', vol: 0.1 });
+      osc(t + 0.4, 196, 0.25, { wave: 'pulse50', vol: 0.1 });
+    },
     checkpoint: (t) => seq(t, ['A5', 'D6', 'F#6'], 0.08, { wave: 'pulse25', vol: 0.1 }),
     select: (t) => osc(t, 880, 0.05, { wave: 'pulse25', vol: 0.08 }),
     confirm: (t) => seq(t, ['A5', 'E6'], 0.06, { wave: 'pulse25', vol: 0.09 }),

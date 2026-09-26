@@ -114,6 +114,7 @@ class Player extends Ent {
         }
         break;
       case 'idle':
+      case 'stuck':
         stepPlayerPhysics(this, {}, G.area, G.platforms);
         break;
       case 'auto':
@@ -979,6 +980,30 @@ class Popup {
   }
   draw(ctx) {
     Font.draw(ctx, this.text, this.x - G.camX, this.y, this.color, { tiny: true, align: 'center', outline: '#1a1020' });
+  }
+}
+
+// Speech bubble for honking drivers and the stuck hero.
+class Bubble {
+  constructor(text, x, y, life = 70) {
+    Object.assign(this, { text, x, y, t: 0, life });
+  }
+  update() {
+    this.t++;
+    if (this.t < 8) this.y -= 0.8;
+    return this.t < this.life;
+  }
+  draw(ctx) {
+    const w = this.text.length * 4 + 5;
+    const x = Math.round(this.x - G.camX - w / 2);
+    const y = Math.round(this.y);
+    ctx.fillStyle = '#1a1020';
+    ctx.fillRect(x - 1, y - 1, w + 2, 11);
+    ctx.fillRect(x + w / 2 - 1, y + 10, 3, 3);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(x, y, w, 9);
+    ctx.fillRect(x + w / 2, y + 9, 1, 3);
+    Font.draw(ctx, this.text, x + 3, y + 2, '#1a1020', { tiny: true });
   }
 }
 

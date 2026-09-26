@@ -693,6 +693,126 @@ const DecorPainters = {
     }
     return { img: c, ox: 0, oy: -(h + 8) };
   },
+  // ---- traffic jam ----
+  vehicle(d) {
+    const W = d.w * 16;
+    const H = d.h * 16 + (d.kind === 'scooter' ? 0 : 0);
+    const c = makeCanvas(W, H);
+    const g = c.getContext('2d');
+    const p = PX(g);
+    const wheel = (x, y, r = 4) => {
+      p.circle(x, y, r, '#1a1a22');
+      p.circle(x, y, Math.max(1, r - 2), '#8a8a96');
+    };
+    const plate = (x, y) => {
+      p.rect(x, y, 19, 7, '#1a1020');
+      p.rect(x + 1, y + 1, 17, 5, '#ffffff');
+      Font.draw(g, 'MH12', x + 10, y + 1, '#1a1020', { tiny: true, align: 'center' });
+    };
+    const face = (x, y) => {
+      p.circle(x, y, 3, '#d99a6c');
+      p.rect(x - 3, y - 4, 7, 2, '#2b1a12');
+      p.dot(x + 1, y - 1, '#1a1020');
+    };
+    if (d.kind === 'auto') {
+      p.rect(3, 2, 24, 2, '#c8920e');
+      p.rect(1, 4, 28, 13, '#fcd23c');
+      p.rect(3, 6, 12, 11, '#2a2230');
+      face(9, 11);
+      p.rect(20, 6, 8, 9, '#8fd8f8');
+      p.rect(20, 6, 8, 2, '#1a1020');
+      p.rect(0, 17, 31, 9, '#1a1a1a');
+      p.rect(0, 20, 31, 2, '#fcd23c');
+      p.rect(28, 18, 3, 3, '#fff4b0');
+      plate(4, 22);
+      wheel(7, 28);
+      wheel(24, 28);
+    } else if (d.kind === 'car') {
+      p.rect(9, 3, 26, 2, '#f0f0f4');
+      p.rect(7, 5, 30, 10, '#f0f0f4');
+      p.rect(10, 6, 11, 8, '#6aa8d8');
+      p.rect(23, 6, 11, 8, '#6aa8d8');
+      face(28, 10);
+      p.rect(1, 14, 46, 11, '#e2352b');
+      p.rect(1, 14, 46, 2, '#f07060');
+      p.rect(44, 16, 3, 3, '#fff4b0');
+      p.rect(1, 17, 3, 3, '#ff5a3a');
+      plate(14, 18);
+      wheel(10, 27);
+      wheel(38, 27);
+    } else if (d.kind === 'bus') {
+      p.rect(2, 1, 92, 3, '#8e2420');
+      p.rect(0, 4, 96, 38, '#b8322a');
+      p.rect(0, 9, 96, 15, '#f4e8c8');
+      for (let x = 6; x < 80; x += 12) {
+        p.rect(x, 11, 10, 11, '#2a3654');
+        face(x + 5, 18);
+      }
+      p.rect(82, 7, 12, 18, '#6aa8d8');
+      p.rect(80, 26, 10, 14, '#2a2230');
+      face(85, 32); // hanging on at the door
+      p.rect(58, 3, 36, 7, '#1a1020');
+      Font.draw(g, 'SWARGATE', 76, 4, '#ffb030', { tiny: true, align: 'center' });
+      Font.draw(g, 'PMPML', 36, 30, '#fff4d0', { tiny: true, align: 'center' });
+      p.rect(0, 37, 96, 3, '#6a1814');
+      wheel(16, 43, 5);
+      wheel(78, 43, 5);
+    } else if (d.kind === 'scooter') {
+      p.rect(6, 3, 7, 6, '#2f63d8'); // helmet
+      p.rect(9, 5, 4, 3, '#8fd8f8');
+      p.rect(7, 9, 6, 9, '#3cb043'); // rider
+      p.rect(9, 11, 6, 2, '#d99a6c');
+      p.rect(1, 18, 14, 7, '#f07cb0');
+      p.rect(13, 12, 2, 7, '#8a8a96');
+      wheel(4, 28, 3);
+      wheel(13, 28, 3);
+    } else if (d.kind === 'cow') {
+      p.rect(4, 6, 22, 9, '#f4efe2');
+      p.rect(8, 3, 6, 4, '#e8e0cc'); // hump
+      p.rect(6, 9, 5, 4, '#b8a890');
+      p.rect(24, 3, 7, 8, '#f4efe2'); // head
+      p.rect(24, 1, 2, 3, '#8a6a4a');
+      p.rect(29, 1, 2, 3, '#8a6a4a');
+      p.dot(29, 6, '#1a1020');
+      p.rect(28, 9, 4, 2, '#f0b8a8');
+      p.rect(2, 7, 2, 5, '#b8a890');
+      p.rect(3, 14, 24, 2, '#c8c0b0');
+    } else if (d.kind === 'truck') {
+      p.rect(0, 4, 46, 34, '#2f63d8');
+      p.rect(0, 4, 46, 4, '#fcd23c');
+      p.rect(2, 10, 42, 22, '#fcd23c');
+      Font.draw(g, 'HORN OK', 23, 13, '#b01818', { tiny: true, align: 'center' });
+      Font.draw(g, 'PLEASE', 23, 20, '#b01818', { tiny: true, align: 'center' });
+      for (let x = 4; x < 44; x += 6) p.rect(x, 28, 3, 3, x % 12 ? '#3cb043' : '#e2352b');
+      p.rect(46, 14, 18, 24, '#f5821f'); // cabin
+      p.rect(50, 17, 12, 9, '#8fd8f8');
+      face(56, 22);
+      p.rect(61, 30, 3, 3, '#fff4b0');
+      p.rect(0, 38, 64, 3, '#1a1a1a');
+      wheel(10, 43, 5);
+      wheel(54, 43, 5);
+    }
+    return { img: c, ox: 0, oy: -H };
+  },
+  trafficCop() {
+    const c = makeCanvas(20, 34);
+    const p = PX(c.getContext('2d'));
+    p.rect(5, 0, 10, 3, '#f4f4f4'); // white cap
+    p.rect(4, 3, 12, 1, '#1a1020');
+    p.rect(6, 4, 8, 7, '#b87a4a');
+    p.dot(11, 6, '#1a1020');
+    p.rect(8, 9, 5, 1, '#2b1a12'); // moustache
+    p.rect(4, 11, 12, 11, '#f4f4f4');
+    p.rect(15, 4, 3, 9, '#f4f4f4'); // arm raised, stopping traffic
+    p.rect(15, 2, 3, 3, '#b87a4a');
+    p.rect(1, 12, 3, 8, '#f4f4f4');
+    p.rect(4, 22, 12, 9, '#c8a060'); // khaki trousers
+    p.rect(9, 22, 1, 9, '#8a6a30');
+    p.rect(3, 31, 6, 3, '#1a1a1a');
+    p.rect(11, 31, 6, 3, '#1a1a1a');
+    p.rect(12, 8, 2, 2, '#c0c0c0'); // whistle
+    return { img: c, ox: 0, oy: -34 };
+  },
   // ---- metro station furniture ----
   bench() {
     const c = makeCanvas(40, 16);

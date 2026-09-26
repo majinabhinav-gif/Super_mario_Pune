@@ -190,11 +190,13 @@ function loadArea(name, spawn) {
   }
   G.flagState = null;
   G.tally = null;
+  G.jamState = area.jam && !(G.jamDoneLevel === G.levelIndex) ? { phase: 'waiting' } : null;
   snapCamera();
 }
 
 function beginLevel() {
   G.level = LEVELS[G.levelIndex]();
+  if (!G.checkpoint || G.checkpoint.levelIndex !== G.levelIndex) G.jamDoneLevel = -1;
   G.time = G.level.time;
   G.timeTick = 0;
   G.hurried = false;
@@ -468,6 +470,63 @@ function finishLevel() {
   }
 }
 
+// --------------------------------------------------------- traffic jam ---
+const JAM_SHOUTS = ['PEEP PEEP!', 'BHAU, SIDE DE!', 'HORN OK PLEASE', 'PAAP PAAP!', 'KITI VEL?!', 'ARE DADA!', 'MOVE, YAAR!', 'PEEEEEP!'];
+
+function updateJam(p) {
+  const js = G.jamState;
+  const jam = G.area.jam;
+  if (js.phase === 'waiting') {
+    if (p.state !== 'normal') return;
+    const front = jam.x0 * TILE;
+    const onRoad = p.onGround && Math.abs(p.y + p.h - 13 * TILE) < 1;
+    if (onRoad && p.x + p.w >= front - 1 && p.x < front) {
+      // walked straight into the jam: stuck!
+      js.phase = 'stuck';
+      js.t = 0;
+      p.state = 'stuck';
+      p.vx = 0;
+      p.facing = 1;
+      Sound.play('honkLow');
+      G.fx.push(new Bubble('?!', p.cx, p.y - 14, 60));
+    } else if (p.x > front + 4 && p.y + p.h < 13 * TILE) {
+      // hopped onto the roofs without waiting
+      js.phase = 'done';
+      G.jamDoneLevel = G.levelIndex;
+      G.addScore(1000, p.cx, p.y);
+      G.fx.push(new Bubble('SMART PUNEKAR!', p.cx, p.y - 26, 90));
+      Sound.play('checkpoint');
+    }
+  } else if (js.phase === 'stuck') {
+    js.t++;
+    if (js.t % 22 === 0 && js.t < 190) {
+      const vx = rand(jam.x0, jam.x1 + 1) * TILE;
+      G.fx.push(new Bubble(JAM_SHOUTS[randi(0, JAM_SHOUTS.length - 1)], vx, rand(120, 150), 50));
+      Sound.play(js.t % 44 === 0 ? 'honk' : 'honkLow');
+    }
+    if (js.t === 200) {
+      p.state = 'normal';
+      p.vy = -2.5;
+      p.onGround = false;
+      js.phase = 'done';
+      G.jamDoneLevel = G.levelIndex;
+      G.fx.push(new Bubble('TIP: HOP ON THE ROOFS!', p.cx + 20, p.y - 30, 150));
+      Sound.play('confirm');
+    }
+  }
+}
+
+function drawJamCaption() {
+  const js = G.jamState;
+  if (!js || js.phase !== 'stuck') return;
+  const mins = Math.min(45, Math.floor(js.t / 20) * 5 + 5);
+  const y = 40;
+  const w = 210;
+  drawPanel(Math.round(VIEW_W / 2 - w / 2), y, w, 30);
+  Font.draw(ctx, 'STUCK IN PUNE TRAFFIC!', VIEW_W / 2, y + 5, '#fcd23c', { align: 'center' });
+  Font.draw(ctx, 'WAITED ' + mins + ' MIN...', VIEW_W / 2, y + 17, '#ffffff', { align: 'center' });
+}
+
 // ------------------------------------------------------------ boss end ---
 function ringBell() {
   const p = G.player;
@@ -599,6 +658,7 @@ function updatePlay() {
     if (p.x + p.w >= G.area.flag.x * TILE - 0.5 && p.x <= poleX + 2 && p.y < 13 * TILE) startFlag();
   }
   if (G.flagState && G.flagState.flagY < G.flagState.flagBottom) G.flagState.flagY += 2;
+  if (G.jamState) updateJam(p);
   if (G.bell && !G.bell.rung && p.state === 'normal' && overlap(p, G.bell)) ringBell();
   if (G.bossSeq) updateBossSeq();
   if (G.tally) updateTally();
@@ -847,9 +907,15 @@ function drawWorld() {
       if (x > -16 && x < VIEW_W) drawTorch(ctx, x, d.y * TILE, G.frame + d.x * 7);
       continue;
     }
-    const x = d.x * TILE + dd.ox - camX;
+    let x = d.x * TILE + dd.ox - camX;
     if (x > VIEW_W || x + dd.img.width < 0) continue;
-    ctx.drawImage(dd.img, x, d.y * TILE + dd.oy);
+    let yo = 0;
+    if (d.jam) {
+      // engines idling; everyone shakes with rage while the hero is stuck
+      yo = ((G.frame >> 3) + d.x) % 2;
+      if (G.jamState && G.jamState.phase === 'stuck' && (G.frame + d.x) % 4 < 2) x += ((G.frame >> 1) + d.x) % 2 ? 1 : -1;
+    }
+    ctx.drawImage(dd.img, x, d.y * TILE + dd.oy - yo);
     if (dd.lights) {
       const cols = ['#ff5a5a', '#fcd23c', '#5ae07a', '#5ab4ff', '#f07cb0'];
       dd.lights.forEach(([lx, ly], i) => {
@@ -1270,6 +1336,7 @@ function render() {
     case 'play':
       drawWorld();
       drawHUD();
+      drawJamCaption();
       if (G.paused) renderPause();
       else G.menuRects = null;
       break;

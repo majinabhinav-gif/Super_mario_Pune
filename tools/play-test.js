@@ -164,7 +164,7 @@ function check(cond, msg) {
 
   console.log('flagpole, tally and next level');
   await start(0, 1);
-  await ev(() => window.SuperPunekar.teleport(193, 5));
+  await ev(() => window.SuperPunekar.teleport(225, 5));
   await page.keyboard.down('ArrowRight');
   await step(90);
   await page.keyboard.up('ArrowRight');

@@ -4,8 +4,8 @@
 // usual block height and row 5 the high block row.
 
 function level1_1() {
-  const A = new Area('main', 212, 'overworld', { music: 'peth' });
-  A.ground(0, 66).ground(69, 84).ground(88, 152).ground(155, 211);
+  const A = new Area('main', 244, 'overworld', { music: 'peth' });
+  A.ground(0, 66).ground(69, 84).ground(88, 152).ground(155, 243);
 
   // decor first (drawn behind everything)
   A.deco('lamp', 1).deco('bunting', 2, 3, { w: 12 }).deco('lamp', 14);
@@ -28,8 +28,8 @@ function level1_1() {
   A.sign(160, ['NO HONKING.', 'IT WILL NOT', 'HELP YOU JUMP.']);
   A.deco('bunting', 158, 3, { w: 12 });
   A.deco('pandal', 172);
-  A.sign(191, ['YES, THIS IS THE', 'RIGHT WAY. DO', 'NOT ASK AGAIN.']);
-  A.deco('lamp', 196);
+  A.sign(223, ['YES, THIS IS THE', 'RIGHT WAY. DO', 'NOT ASK AGAIN.']);
+  A.deco('lamp', 228);
 
   // first blocks
   A.q(14, 9, 'coin');
@@ -77,9 +77,18 @@ function level1_1() {
   A.brick(168, 9).brick(169, 9).q(170, 9, 'coin').brick(171, 9);
   A.enemy('auto', 172).enemy('auto', 174);
   A.pipe(178, 11, { cobra: true });
-  A.stairs(181, 8, 1).column(189, 8);
-  A.setFlag(198);
-  A.setHouse(202);
+
+  // Pune traffic jam: walk into it and you are stuck; hop along the roofs instead
+  A.sign(180, ['TRAFFIC AHEAD!', 'WAIT: 45 MIN.']);
+  A.vehicle('auto', 184, 2, 2).vehicle('car', 186, 3, 2).vehicle('bus', 189, 6, 3);
+  A.vehicle('scooter', 195, 1, 2).vehicle('cow', 196, 2, 1).vehicle('truck', 198, 4, 3);
+  A.vehicle('auto', 202, 2, 2).vehicle('car', 204, 3, 2);
+  A.deco('trafficCop', 208);
+  A.sign(210, ['SIGNAL BROKEN.', 'PLEASE ADJUST.']);
+
+  A.stairs(213, 8, 1).column(221, 8);
+  A.setFlag(230);
+  A.setHouse(234);
 
   // bonus room under the old city
   const B = new Area('bonus', 17, 'underground', { music: 'metro' });

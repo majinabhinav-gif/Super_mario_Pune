@@ -1138,6 +1138,14 @@ const Sound = (() => {
     },
     bossFall: (t) => osc(t, 500, 1.6, { wave: 'pulse25', vol: 0.12, slide: 50 }),
     throwIt: (t) => noise(t, 0.12, { type: 'bandpass', freq: 1500, slideFreq: 600, vol: 0.12 }),
+    honk: (t) => {
+      osc(t, 415, 0.22, { wave: 'pulse50', vol: 0.09 });
+      osc(t, 523, 0.22, { wave: 'pulse25', vol: 0.07 });
+    },
+    honkLow: (t) => {
+      osc(t, 196, 0.35, { wave: 'pulse50', vol: 0.1 });
+      osc(t + 0.4, 196, 0.25, { wave: 'pulse50', vol: 0.1 });
+    },
     checkpoint: (t) => seq(t, ['A5', 'D6', 'F#6'], 0.08, { wave: 'pulse25', vol: 0.1 }),
     select: (t) => osc(t, 880, 0.05, { wave: 'pulse25', vol: 0.08 }),
     confirm: (t) => seq(t, ['A5', 'E6'], 0.06, { wave: 'pulse25', vol: 0.09 }),
@@ -3138,6 +3146,126 @@ const DecorPainters = {
     }
     return { img: c, ox: 0, oy: -(h + 8) };
   },
+  // ---- traffic jam ----
+  vehicle(d) {
+    const W = d.w * 16;
+    const H = d.h * 16 + (d.kind === 'scooter' ? 0 : 0);
+    const c = makeCanvas(W, H);
+    const g = c.getContext('2d');
+    const p = PX(g);
+    const wheel = (x, y, r = 4) => {
+      p.circle(x, y, r, '#1a1a22');
+      p.circle(x, y, Math.max(1, r - 2), '#8a8a96');
+    };
+    const plate = (x, y) => {
+      p.rect(x, y, 19, 7, '#1a1020');
+      p.rect(x + 1, y + 1, 17, 5, '#ffffff');
+      Font.draw(g, 'MH12', x + 10, y + 1, '#1a1020', { tiny: true, align: 'center' });
+    };
+    const face = (x, y) => {
+      p.circle(x, y, 3, '#d99a6c');
+      p.rect(x - 3, y - 4, 7, 2, '#2b1a12');
+      p.dot(x + 1, y - 1, '#1a1020');
+    };
+    if (d.kind === 'auto') {
+      p.rect(3, 2, 24, 2, '#c8920e');
+      p.rect(1, 4, 28, 13, '#fcd23c');
+      p.rect(3, 6, 12, 11, '#2a2230');
+      face(9, 11);
+      p.rect(20, 6, 8, 9, '#8fd8f8');
+      p.rect(20, 6, 8, 2, '#1a1020');
+      p.rect(0, 17, 31, 9, '#1a1a1a');
+      p.rect(0, 20, 31, 2, '#fcd23c');
+      p.rect(28, 18, 3, 3, '#fff4b0');
+      plate(4, 22);
+      wheel(7, 28);
+      wheel(24, 28);
+    } else if (d.kind === 'car') {
+      p.rect(9, 3, 26, 2, '#f0f0f4');
+      p.rect(7, 5, 30, 10, '#f0f0f4');
+      p.rect(10, 6, 11, 8, '#6aa8d8');
+      p.rect(23, 6, 11, 8, '#6aa8d8');
+      face(28, 10);
+      p.rect(1, 14, 46, 11, '#e2352b');
+      p.rect(1, 14, 46, 2, '#f07060');
+      p.rect(44, 16, 3, 3, '#fff4b0');
+      p.rect(1, 17, 3, 3, '#ff5a3a');
+      plate(14, 18);
+      wheel(10, 27);
+      wheel(38, 27);
+    } else if (d.kind === 'bus') {
+      p.rect(2, 1, 92, 3, '#8e2420');
+      p.rect(0, 4, 96, 38, '#b8322a');
+      p.rect(0, 9, 96, 15, '#f4e8c8');
+      for (let x = 6; x < 80; x += 12) {
+        p.rect(x, 11, 10, 11, '#2a3654');
+        face(x + 5, 18);
+      }
+      p.rect(82, 7, 12, 18, '#6aa8d8');
+      p.rect(80, 26, 10, 14, '#2a2230');
+      face(85, 32); // hanging on at the door
+      p.rect(58, 3, 36, 7, '#1a1020');
+      Font.draw(g, 'SWARGATE', 76, 4, '#ffb030', { tiny: true, align: 'center' });
+      Font.draw(g, 'PMPML', 36, 30, '#fff4d0', { tiny: true, align: 'center' });
+      p.rect(0, 37, 96, 3, '#6a1814');
+      wheel(16, 43, 5);
+      wheel(78, 43, 5);
+    } else if (d.kind === 'scooter') {
+      p.rect(6, 3, 7, 6, '#2f63d8'); // helmet
+      p.rect(9, 5, 4, 3, '#8fd8f8');
+      p.rect(7, 9, 6, 9, '#3cb043'); // rider
+      p.rect(9, 11, 6, 2, '#d99a6c');
+      p.rect(1, 18, 14, 7, '#f07cb0');
+      p.rect(13, 12, 2, 7, '#8a8a96');
+      wheel(4, 28, 3);
+      wheel(13, 28, 3);
+    } else if (d.kind === 'cow') {
+      p.rect(4, 6, 22, 9, '#f4efe2');
+      p.rect(8, 3, 6, 4, '#e8e0cc'); // hump
+      p.rect(6, 9, 5, 4, '#b8a890');
+      p.rect(24, 3, 7, 8, '#f4efe2'); // head
+      p.rect(24, 1, 2, 3, '#8a6a4a');
+      p.rect(29, 1, 2, 3, '#8a6a4a');
+      p.dot(29, 6, '#1a1020');
+      p.rect(28, 9, 4, 2, '#f0b8a8');
+      p.rect(2, 7, 2, 5, '#b8a890');
+      p.rect(3, 14, 24, 2, '#c8c0b0');
+    } else if (d.kind === 'truck') {
+      p.rect(0, 4, 46, 34, '#2f63d8');
+      p.rect(0, 4, 46, 4, '#fcd23c');
+      p.rect(2, 10, 42, 22, '#fcd23c');
+      Font.draw(g, 'HORN OK', 23, 13, '#b01818', { tiny: true, align: 'center' });
+      Font.draw(g, 'PLEASE', 23, 20, '#b01818', { tiny: true, align: 'center' });
+      for (let x = 4; x < 44; x += 6) p.rect(x, 28, 3, 3, x % 12 ? '#3cb043' : '#e2352b');
+      p.rect(46, 14, 18, 24, '#f5821f'); // cabin
+      p.rect(50, 17, 12, 9, '#8fd8f8');
+      face(56, 22);
+      p.rect(61, 30, 3, 3, '#fff4b0');
+      p.rect(0, 38, 64, 3, '#1a1a1a');
+      wheel(10, 43, 5);
+      wheel(54, 43, 5);
+    }
+    return { img: c, ox: 0, oy: -H };
+  },
+  trafficCop() {
+    const c = makeCanvas(20, 34);
+    const p = PX(c.getContext('2d'));
+    p.rect(5, 0, 10, 3, '#f4f4f4'); // white cap
+    p.rect(4, 3, 12, 1, '#1a1020');
+    p.rect(6, 4, 8, 7, '#b87a4a');
+    p.dot(11, 6, '#1a1020');
+    p.rect(8, 9, 5, 1, '#2b1a12'); // moustache
+    p.rect(4, 11, 12, 11, '#f4f4f4');
+    p.rect(15, 4, 3, 9, '#f4f4f4'); // arm raised, stopping traffic
+    p.rect(15, 2, 3, 3, '#b87a4a');
+    p.rect(1, 12, 3, 8, '#f4f4f4');
+    p.rect(4, 22, 12, 9, '#c8a060'); // khaki trousers
+    p.rect(9, 22, 1, 9, '#8a6a30');
+    p.rect(3, 31, 6, 3, '#1a1a1a');
+    p.rect(11, 31, 6, 3, '#1a1a1a');
+    p.rect(12, 8, 2, 2, '#c0c0c0'); // whistle
+    return { img: c, ox: 0, oy: -34 };
+  },
   // ---- metro station furniture ----
   bench() {
     const c = makeCanvas(40, 16);
@@ -3317,11 +3445,12 @@ const T = {
   SPIPE_MB: 17,
   SPIPE_T: 18,
   SPIPE_B: 19,
+  VEHICLE: 20, // invisible solid box under a traffic-jam vehicle drawing
 };
 
 const SOLID = new Uint8Array(32);
 [T.GROUND, T.BRICK, T.QBLOCK, T.USED, T.HARD, T.PIPE_TL, T.PIPE_TR, T.PIPE_L, T.PIPE_R, T.STONE, T.BRIDGE,
-  T.SPIPE_MT, T.SPIPE_MB, T.SPIPE_T, T.SPIPE_B].forEach((t) => (SOLID[t] = 1));
+  T.SPIPE_MT, T.SPIPE_MB, T.SPIPE_T, T.SPIPE_B, T.VEHICLE].forEach((t) => (SOLID[t] = 1));
 
 class Area {
   constructor(name, width, theme, opts = {}) {
@@ -3342,6 +3471,7 @@ class Area {
     this.checkpoints = [];
     this.boss = null;
     this.bgTint = opts.bgTint || null;
+    this.jam = null; // traffic jam gag: { x0, x1 } in tiles
     this.cameraMaxX = null;
   }
   inBounds(x, y) {
@@ -3455,6 +3585,15 @@ class Area {
   lavaPit(x0, x1, top = 13) {
     this.fill(x0, x1, top, ROWS - 1, T.LAVA);
     this.lava.push({ x0, x1, y: top });
+    return this;
+  }
+  // a stuck vehicle: drawn as decor, solid so the hero can hop along the roofs
+  vehicle(kind, x, w, h) {
+    this.fill(x, x + w - 1, 13 - h, 12, T.VEHICLE);
+    this.decor.push({ type: 'vehicle', kind, x, y: 13, w, h, jam: true });
+    if (!this.jam) this.jam = { x0: x, x1: x + w - 1 };
+    this.jam.x0 = Math.min(this.jam.x0, x);
+    this.jam.x1 = Math.max(this.jam.x1, x + w - 1);
     return this;
   }
   enemy(type, x, y = 12, opts = {}) {
@@ -3721,8 +3860,8 @@ function stepPlayerPhysics(p, input, area, platforms) {
 // usual block height and row 5 the high block row.
 
 function level1_1() {
-  const A = new Area('main', 212, 'overworld', { music: 'peth' });
-  A.ground(0, 66).ground(69, 84).ground(88, 152).ground(155, 211);
+  const A = new Area('main', 244, 'overworld', { music: 'peth' });
+  A.ground(0, 66).ground(69, 84).ground(88, 152).ground(155, 243);
 
   // decor first (drawn behind everything)
   A.deco('lamp', 1).deco('bunting', 2, 3, { w: 12 }).deco('lamp', 14);
@@ -3745,8 +3884,8 @@ function level1_1() {
   A.sign(160, ['NO HONKING.', 'IT WILL NOT', 'HELP YOU JUMP.']);
   A.deco('bunting', 158, 3, { w: 12 });
   A.deco('pandal', 172);
-  A.sign(191, ['YES, THIS IS THE', 'RIGHT WAY. DO', 'NOT ASK AGAIN.']);
-  A.deco('lamp', 196);
+  A.sign(223, ['YES, THIS IS THE', 'RIGHT WAY. DO', 'NOT ASK AGAIN.']);
+  A.deco('lamp', 228);
 
   // first blocks
   A.q(14, 9, 'coin');
@@ -3794,9 +3933,18 @@ function level1_1() {
   A.brick(168, 9).brick(169, 9).q(170, 9, 'coin').brick(171, 9);
   A.enemy('auto', 172).enemy('auto', 174);
   A.pipe(178, 11, { cobra: true });
-  A.stairs(181, 8, 1).column(189, 8);
-  A.setFlag(198);
-  A.setHouse(202);
+
+  // Pune traffic jam: walk into it and you are stuck; hop along the roofs instead
+  A.sign(180, ['TRAFFIC AHEAD!', 'WAIT: 45 MIN.']);
+  A.vehicle('auto', 184, 2, 2).vehicle('car', 186, 3, 2).vehicle('bus', 189, 6, 3);
+  A.vehicle('scooter', 195, 1, 2).vehicle('cow', 196, 2, 1).vehicle('truck', 198, 4, 3);
+  A.vehicle('auto', 202, 2, 2).vehicle('car', 204, 3, 2);
+  A.deco('trafficCop', 208);
+  A.sign(210, ['SIGNAL BROKEN.', 'PLEASE ADJUST.']);
+
+  A.stairs(213, 8, 1).column(221, 8);
+  A.setFlag(230);
+  A.setHouse(234);
 
   // bonus room under the old city
   const B = new Area('bonus', 17, 'underground', { music: 'metro' });
@@ -4149,6 +4297,7 @@ class Player extends Ent {
         }
         break;
       case 'idle':
+      case 'stuck':
         stepPlayerPhysics(this, {}, G.area, G.platforms);
         break;
       case 'auto':
@@ -5017,6 +5166,30 @@ class Popup {
   }
 }
 
+// Speech bubble for honking drivers and the stuck hero.
+class Bubble {
+  constructor(text, x, y, life = 70) {
+    Object.assign(this, { text, x, y, t: 0, life });
+  }
+  update() {
+    this.t++;
+    if (this.t < 8) this.y -= 0.8;
+    return this.t < this.life;
+  }
+  draw(ctx) {
+    const w = this.text.length * 4 + 5;
+    const x = Math.round(this.x - G.camX - w / 2);
+    const y = Math.round(this.y);
+    ctx.fillStyle = '#1a1020';
+    ctx.fillRect(x - 1, y - 1, w + 2, 11);
+    ctx.fillRect(x + w / 2 - 1, y + 10, 3, 3);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(x, y, w, 9);
+    ctx.fillRect(x + w / 2, y + 9, 1, 3);
+    Font.draw(ctx, this.text, x + 3, y + 2, '#1a1020', { tiny: true });
+  }
+}
+
 class Debris {
   constructor(x, y, vx, vy, img) {
     Object.assign(this, { x, y, vx, vy, img, t: 0 });
@@ -5326,11 +5499,13 @@ function loadArea(name, spawn) {
   }
   G.flagState = null;
   G.tally = null;
+  G.jamState = area.jam && !(G.jamDoneLevel === G.levelIndex) ? { phase: 'waiting' } : null;
   snapCamera();
 }
 
 function beginLevel() {
   G.level = LEVELS[G.levelIndex]();
+  if (!G.checkpoint || G.checkpoint.levelIndex !== G.levelIndex) G.jamDoneLevel = -1;
   G.time = G.level.time;
   G.timeTick = 0;
   G.hurried = false;
@@ -5604,6 +5779,63 @@ function finishLevel() {
   }
 }
 
+// --------------------------------------------------------- traffic jam ---
+const JAM_SHOUTS = ['PEEP PEEP!', 'BHAU, SIDE DE!', 'HORN OK PLEASE', 'PAAP PAAP!', 'KITI VEL?!', 'ARE DADA!', 'MOVE, YAAR!', 'PEEEEEP!'];
+
+function updateJam(p) {
+  const js = G.jamState;
+  const jam = G.area.jam;
+  if (js.phase === 'waiting') {
+    if (p.state !== 'normal') return;
+    const front = jam.x0 * TILE;
+    const onRoad = p.onGround && Math.abs(p.y + p.h - 13 * TILE) < 1;
+    if (onRoad && p.x + p.w >= front - 1 && p.x < front) {
+      // walked straight into the jam: stuck!
+      js.phase = 'stuck';
+      js.t = 0;
+      p.state = 'stuck';
+      p.vx = 0;
+      p.facing = 1;
+      Sound.play('honkLow');
+      G.fx.push(new Bubble('?!', p.cx, p.y - 14, 60));
+    } else if (p.x > front + 4 && p.y + p.h < 13 * TILE) {
+      // hopped onto the roofs without waiting
+      js.phase = 'done';
+      G.jamDoneLevel = G.levelIndex;
+      G.addScore(1000, p.cx, p.y);
+      G.fx.push(new Bubble('SMART PUNEKAR!', p.cx, p.y - 26, 90));
+      Sound.play('checkpoint');
+    }
+  } else if (js.phase === 'stuck') {
+    js.t++;
+    if (js.t % 22 === 0 && js.t < 190) {
+      const vx = rand(jam.x0, jam.x1 + 1) * TILE;
+      G.fx.push(new Bubble(JAM_SHOUTS[randi(0, JAM_SHOUTS.length - 1)], vx, rand(120, 150), 50));
+      Sound.play(js.t % 44 === 0 ? 'honk' : 'honkLow');
+    }
+    if (js.t === 200) {
+      p.state = 'normal';
+      p.vy = -2.5;
+      p.onGround = false;
+      js.phase = 'done';
+      G.jamDoneLevel = G.levelIndex;
+      G.fx.push(new Bubble('TIP: HOP ON THE ROOFS!', p.cx + 20, p.y - 30, 150));
+      Sound.play('confirm');
+    }
+  }
+}
+
+function drawJamCaption() {
+  const js = G.jamState;
+  if (!js || js.phase !== 'stuck') return;
+  const mins = Math.min(45, Math.floor(js.t / 20) * 5 + 5);
+  const y = 40;
+  const w = 210;
+  drawPanel(Math.round(VIEW_W / 2 - w / 2), y, w, 30);
+  Font.draw(ctx, 'STUCK IN PUNE TRAFFIC!', VIEW_W / 2, y + 5, '#fcd23c', { align: 'center' });
+  Font.draw(ctx, 'WAITED ' + mins + ' MIN...', VIEW_W / 2, y + 17, '#ffffff', { align: 'center' });
+}
+
 // ------------------------------------------------------------ boss end ---
 function ringBell() {
   const p = G.player;
@@ -5735,6 +5967,7 @@ function updatePlay() {
     if (p.x + p.w >= G.area.flag.x * TILE - 0.5 && p.x <= poleX + 2 && p.y < 13 * TILE) startFlag();
   }
   if (G.flagState && G.flagState.flagY < G.flagState.flagBottom) G.flagState.flagY += 2;
+  if (G.jamState) updateJam(p);
   if (G.bell && !G.bell.rung && p.state === 'normal' && overlap(p, G.bell)) ringBell();
   if (G.bossSeq) updateBossSeq();
   if (G.tally) updateTally();
@@ -5983,9 +6216,15 @@ function drawWorld() {
       if (x > -16 && x < VIEW_W) drawTorch(ctx, x, d.y * TILE, G.frame + d.x * 7);
       continue;
     }
-    const x = d.x * TILE + dd.ox - camX;
+    let x = d.x * TILE + dd.ox - camX;
     if (x > VIEW_W || x + dd.img.width < 0) continue;
-    ctx.drawImage(dd.img, x, d.y * TILE + dd.oy);
+    let yo = 0;
+    if (d.jam) {
+      // engines idling; everyone shakes with rage while the hero is stuck
+      yo = ((G.frame >> 3) + d.x) % 2;
+      if (G.jamState && G.jamState.phase === 'stuck' && (G.frame + d.x) % 4 < 2) x += ((G.frame >> 1) + d.x) % 2 ? 1 : -1;
+    }
+    ctx.drawImage(dd.img, x, d.y * TILE + dd.oy - yo);
     if (dd.lights) {
       const cols = ['#ff5a5a', '#fcd23c', '#5ae07a', '#5ab4ff', '#f07cb0'];
       dd.lights.forEach(([lx, ly], i) => {
@@ -6406,6 +6645,7 @@ function render() {
     case 'play':
       drawWorld();
       drawHUD();
+      drawJamCaption();
       if (G.paused) renderPause();
       else G.menuRects = null;
       break;
