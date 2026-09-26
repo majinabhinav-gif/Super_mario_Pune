@@ -54,6 +54,16 @@ Phones play best held sideways: holding one upright shows a "turn your phone sid
 - Every level can be finished without ever pressing run. `tools/verify-levels.js` checks this automatically.
 - The time limit is generous (the clock ticks every 0.6 s).
 
+## Put it online (Vercel)
+
+The repo is ready for Vercel: `vercel.json` tells it to skip installing packages, build the single-file game and serve it.
+
+1. On vercel.com choose **Add New → Project** and import `Super_mario_Pune` from GitHub.
+2. Keep the defaults (Vercel reads the settings from `vercel.json`) and click **Deploy**.
+3. Vercel deploys the production branch (usually `main`) as the main site; other branches get preview links.
+
+Any static host works the same way: just serve `dist/super-punekar.html` as the page.
+
 ## Project layout
 
 ```
